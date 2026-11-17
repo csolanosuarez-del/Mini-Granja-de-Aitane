@@ -68,7 +68,7 @@
             <button class="user-btn" onclick="selectUser(this, 'Jeanine')">👩‍💼 Jeanine</button>
         </div>
 
-        <div id="sec-resumen" class="seccion active">
+        <div id="sec-resumen" class="seccion active" style="display: block;">
             <div class="card">
                 <h3>📊 Resumen del Día por Galpón</h3>
                 <p style="margin-bottom: 8px;">Total huevos recolectados: <strong id="huevos-total" style="font-size: 1.1rem; color: var(--primary);">0</strong></p>
@@ -106,7 +106,7 @@
             </div>
         </div>
 
-        <div id="sec-produccion" class="seccion">
+        <div id="sec-produccion" class="seccion" style="display: none;">
             <div class="card">
                 <h3>🥚 Registrar o Editar Recolección</h3>
                 
@@ -132,7 +132,7 @@
             </div>
         </div>
 
-        <div id="sec-ventas" class="seccion">
+        <div id="sec-ventas" class="seccion" style="display: none;">
             <div class="card">
                 <h3>💰 Registro de Ventas por Categoría</h3>
 
@@ -168,7 +168,7 @@
             </div>
         </div>
 
-        <div id="sec-costos" class="seccion">
+        <div id="sec-costos" class="seccion" style="display: none;">
             <div class="card">
                 <h3>📋 Registro de Costos / Alimento</h3>
                 <label>Descripción del gasto:</label>
@@ -226,8 +226,17 @@
         function cambiarSeccion(btn, idSeccion) {
             document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
-            document.querySelectorAll('.seccion').forEach(s => s.classList.remove('active'));
-            document.getElementById(idSeccion).classList.add('active');
+
+            document.querySelectorAll('.seccion').forEach(s => {
+                s.style.display = 'none';
+                s.classList.remove('active');
+            });
+
+            const seccionDeseada = document.getElementById(idSeccion);
+            if (seccionDeseada) {
+                seccionDeseada.style.display = 'block';
+                seccionDeseada.classList.add('active');
+            }
         }
 
         function abrirAjustes() { document.getElementById('modal-ajustes').style.display = 'flex'; }
