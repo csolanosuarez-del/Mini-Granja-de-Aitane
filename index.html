@@ -61,9 +61,16 @@
                 </div>
             </div>
 
-            <!-- Gráfico de Producción Semanal -->
+            <!-- Gráfico de Producción con Selector de Vista -->
             <div class="bg-white rounded-2xl p-5 shadow-sm border border-amber-100">
-                <h3 class="text-md font-bold text-amber-900 mb-2">📈 Tendencia de Producción</h3>
+                <div class="flex justify-between items-center mb-3 flex-wrap gap-2">
+                    <h3 class="text-md font-bold text-amber-900">📈 Tendencia de Producción</h3>
+                    <div class="flex bg-amber-50 p-1 rounded-xl border border-amber-200 text-xs font-semibold">
+                        <button onclick="cambiarVistaGrafica('diario')" id="btn-v-diario" class="px-3 py-1.5 rounded-lg bg-amber-600 text-white transition">Diario</button>
+                        <button onclick="cambiarVistaGrafica('semanal')" id="btn-v-semanal" class="px-3 py-1.5 rounded-lg text-amber-800 transition">Semanal</button>
+                        <button onclick="cambiarVistaGrafica('mensual')" id="btn-v-mensual" class="px-3 py-1.5 rounded-lg text-amber-800 transition">Mensual</button>
+                    </div>
+                </div>
                 <canvas id="graficoProduccion" height="120"></canvas>
             </div>
         </div>
@@ -240,7 +247,7 @@
         </div>
     </div>
 
-    <!-- Script Principal con Firebase -->
+    <!-- Script Principal con Firebase y Selector de Gráfica -->
     <script>
         const firebaseConfig = {
             databaseURL: "https://mini-granja-de-aitane-default-rtdb.firebaseio.com/"
@@ -249,6 +256,7 @@
         const db = firebase.database();
 
         let usuarioActual = "Mamá";
+        let vistaGraficaActual = "diario"; // 'diario', 'semanal', 'mensual'
         let dbData = {
             galpones: { grandes: 100, medio: 80, derecha: 200 },
             registros: [],
@@ -258,7 +266,6 @@
 
         let chartInstance = null;
 
-        // Escuchar cambios en tiempo real
         db.ref('granja').on('value', (snapshot) => {
             const data = snapshot.val();
             if (data) {
@@ -271,19 +278,16 @@
                 document.getElementById('sync-status').innerText = "🟢 En línea";
                 document.getElementById('sync-status').className = "text-xs bg-emerald-600 px-2 py-1 rounded-full font-semibold";
             } else {
-                guardarEnFirebase(); // Inicializar si está vacío
+                guardarEnFirebase();
             }
             actualizarPantalla();
         }, (error) => {
-            console.error("Error de Firebase:", error);
             document.getElementById('sync-status').innerText = "🔴 Error sinc";
             document.getElementById('sync-status').className = "text-xs bg-rose-600 px-2 py-1 rounded-full font-semibold";
         });
 
         function guardarEnFirebase() {
-            db.ref('granja').set(dbData).catch(err => {
-                alert("Error al guardar en Firebase: " + err.message);
-            });
+            db.ref('granja').set(dbData);
         }
 
         document.addEventListener("DOMContentLoaded", () => {
@@ -312,6 +316,19 @@
             });
             document.getElementById(`tab-${tabId}`).classList.add('active');
             document.getElementById(`nav-${tabId}`).className = "flex flex-col items-center text-amber-700 font-bold text-xs";
+        }
+
+        function cambiarVistaGrafica(tipo) {
+            vistaGraficaActual = tipo;
+            ['diario', 'semanal', 'mensual'].forEach(t => {
+                const btn = document.getElementById(`btn-v-${t}`);
+                if (t === tipo) {
+                    btn.className = "px-3 py-1.5 rounded-lg bg-amber-600 text-white transition";
+                } else {
+                    btn.className = "px-3 py-1.5 rounded-lg text-amber-800 transition";
+                }
+            });
+            actualizarGrafico();
         }
 
         function guardarProduccion(e) {
@@ -423,29 +440,45 @@
 
         function actualizarGrafico() {
             const ctx = document.getElementById('graficoProduccion').getContext('2d');
-            const ultimosDias = {};
-            
+            const agrupado = {};
+
             if (dbData.registros) {
                 dbData.registros.forEach(r => {
                     const totalH = r.grandes + r.medio + r.derecha;
-                    ultimosDias[r.fecha] = (ultimosDias[r.fecha] || 0) + totalH;
+                    let clave = r.fecha; // Por defecto diario
+
+                    if (vistaGraficaActual === 'mensual') {
+                        clave = r.fecha.substring(0, 7); // Agrupa por Año-Mes (ej. 2026-11)
+                    } else if (vistaGraficaActual === 'semanal') {
+                        // Cálculo simple de año y semana o mes agrupado
+                        const d = new Date(r.fecha);
+                        const año = d.getFullYear();
+                        const unaSemana = 1000 * 60 * 60 * 24 * 7;
+                        const inicioAño = new Date(año, 0, 1);
+                        const semana = Math.ceil(((d - inicioAño) / unaSemana) + 1);
+                        clave = `${año}-Semana ${semana}`;
+                    }
+
+                    agrupado[clave] = (agrupado[clave] || 0) + totalH;
                 });
             }
 
-            const fechas = Object.keys(ultimosDias).sort().slice(-7);
-            const totales = fechas.map(f => ultimosDias[f]);
+            const etiquetas = Object.keys(agrupado).sort();
+            const valores = etiquetas.map(e => agrupado[e]);
 
             if (chartInstance) {
                 chartInstance.destroy();
             }
 
+            let labelTexto = vistaGraficaActual === 'mensual' ? 'Total Huevos Mensual' : (vistaGraficaActual === 'semanal' ? 'Total Huevos Semanal' : 'Total Huevos Diario');
+
             chartInstance = new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: fechas,
+                    labels: etiquetas,
                     datasets: [{
-                        label: 'Total Huevos',
-                        data: totales,
+                        label: labelTexto,
+                        data: valores,
                         borderColor: '#d97706',
                         backgroundColor: 'rgba(217, 119, 6, 0.1)',
                         fill: true,
