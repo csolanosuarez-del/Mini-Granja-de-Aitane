@@ -36,7 +36,6 @@
         .bloque-card { background: #fffbeb; border: 1px solid #fde68a; padding: 10px; border-radius: 10px; text-align: center; }
         .bloque-card h4 { margin: 0 0 5px 0; color: #92400e; font-size: 0.9rem; }
         
-        /* Gráfica Nativa en CSS */
         .grafica-container { display: flex; align-items: flex-end; justify-content: space-around; height: 140px; border-bottom: 2px solid var(--border); padding-bottom: 5px; margin-top: 15px; gap: 15px; }
         .barra-wrapper { display: flex; flex-direction: column; align-items: center; flex: 1; height: 100%; justify-content: flex-end; }
         .barra { width: 100%; max-width: 50px; background: var(--primary); border-radius: 6px 6px 0 0; display: flex; justify-content: center; align-items: flex-start; padding-top: 4px; color: white; font-size: 0.75rem; font-weight: bold; height: 5px; transition: height 0.3s; }
@@ -63,14 +62,12 @@
     </header>
 
     <div class="container">
-        <!-- Selector de Usuarios -->
         <div class="users">
             <button class="user-btn active" onclick="selectUser(this, 'Mamá')">👩‍🌾 Mamá</button>
             <button class="user-btn" onclick="selectUser(this, 'Yo')">🧑‍💻 Yo</button>
             <button class="user-btn" onclick="selectUser(this, 'Jeanine')">👩‍💼 Jeanine</button>
         </div>
 
-        <!-- SECCIÓN 1: RESUMEN Y GRÁFICA -->
         <div id="sec-resumen" class="seccion active">
             <div class="card">
                 <h3>📊 Resumen del Día por Galpón</h3>
@@ -83,7 +80,6 @@
                 </div>
             </div>
 
-            <!-- Gráfica de Barras Nativa -->
             <div class="card">
                 <h3>📈 Rendimiento Acumulado</h3>
                 <div class="grafica-container">
@@ -110,7 +106,6 @@
             </div>
         </div>
 
-        <!-- SECCIÓN 2: PRODUCCIÓN (CON FECHA Y EDICIÓN) -->
         <div id="sec-produccion" class="seccion">
             <div class="card">
                 <h3>🥚 Registrar o Editar Recolección</h3>
@@ -137,7 +132,6 @@
             </div>
         </div>
 
-        <!-- SECCIÓN 3: VENTAS (POR CATEGORÍA Y CLIENTE) -->
         <div id="sec-ventas" class="seccion">
             <div class="card">
                 <h3>💰 Registro de Ventas por Categoría</h3>
@@ -174,7 +168,6 @@
             </div>
         </div>
 
-        <!-- SECCIÓN 4: COSTOS -->
         <div id="sec-costos" class="seccion">
             <div class="card">
                 <h3>📋 Registro de Costos / Alimento</h3>
@@ -185,10 +178,8 @@
                 <button onclick="guardarCosto()" style="margin-top: 15px;">💾 Guardar Costo</button>
             </div>
         </div>
-
     </div>
 
-    <!-- Menú Inferior -->
     <nav class="nav-bottom">
         <button id="nav-btn-resumen" class="nav-item active" onclick="cambiarSeccion(this, 'sec-resumen')">📊<br>Resumen</button>
         <button class="nav-item" onclick="cambiarSeccion(this, 'sec-produccion')">🥚<br>Producción</button>
@@ -196,7 +187,6 @@
         <button class="nav-item" onclick="cambiarSeccion(this, 'sec-costos')">📋<br>Costos</button>
     </nav>
 
-    <!-- Modal de Ajustes -->
     <div id="modal-ajustes" class="modal">
         <div class="modal-content">
             <h3>⚙️ Configuración de Galpones</h3>
@@ -204,4 +194,207 @@
             <input type="text" id="input-sala" value="granja-isa-scz-2026">
             
             <label style="margin-top: 10px; display: block;">Gallinas en "Grandes":</label>
-            <input type
+            <input type="number" id="gallinas-grandes" value="35">
+            
+            <label style="margin-top: 10px; display: block;">Gallinas en "Medio":</label>
+            <input type="number" id="gallinas-medio" value="35">
+            
+            <label style="margin-top: 10px; display: block;">Gallinas en "Derecha":</label>
+            <input type="number" id="gallinas-derecha" value="30">
+
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button onclick="cerrarAjustes()" style="background: #6b7280;">Cancelar</button>
+                <button onclick="guardarAjustes()">Guardar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let usuarioActual = 'Mamá';
+        let registros = [];
+        let ventasRegistradas = [];
+        let galpones = { grandes: 35, medio: 35, derecha: 30 };
+
+        document.getElementById('input-fecha').value = new Date().toISOString().split('T')[0];
+
+        function selectUser(btn, nombre) {
+            document.querySelectorAll('.user-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            usuarioActual = nombre;
+        }
+
+        function cambiarSeccion(btn, idSeccion) {
+            document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            document.querySelectorAll('.seccion').forEach(s => s.classList.remove('active'));
+            document.getElementById(idSeccion).classList.add('active');
+        }
+
+        function abrirAjustes() { document.getElementById('modal-ajustes').style.display = 'flex'; }
+        function cerrarAjustes() { document.getElementById('modal-ajustes').style.display = 'none'; }
+
+        function guardarAjustes() {
+            galpones.grandes = parseInt(document.getElementById('gallinas-grandes').value) || 1;
+            galpones.medio = parseInt(document.getElementById('gallinas-medio').value) || 1;
+            galpones.derecha = parseInt(document.getElementById('gallinas-derecha').value) || 1;
+            alert('¡Configuración guardada correctamente!');
+            cerrarAjustes();
+            actualizarPantallaResumen();
+        }
+
+        function calcularEnTiempoReal() {
+            const g = parseInt(document.getElementById('input-grandes').value) || 0;
+            const m = parseInt(document.getElementById('input-medio').value) || 0;
+            const d = parseInt(document.getElementById('input-derecha').value) || 0;
+            const total = g + m + d;
+
+            const pG = Math.round((g / galpones.grandes) * 100);
+            const pM = Math.round((m / galpones.medio) * 100);
+            const pD = Math.round((d / galpones.derecha) * 100);
+
+            document.getElementById('huevos-total').innerText = total;
+            document.getElementById('postura-grandes').innerText = pG + '%';
+            document.getElementById('postura-medio').innerText = pM + '%';
+            document.getElementById('postura-derecha').innerText = pD + '%';
+        }
+
+        document.getElementById('input-grandes').addEventListener('input', calcularEnTiempoReal);
+        document.getElementById('input-medio').addEventListener('input', calcularEnTiempoReal);
+        document.getElementById('input-derecha').addEventListener('input', calcularEnTiempoReal);
+
+        function guardarProduccion() {
+            const fecha = document.getElementById('input-fecha').value;
+            const g = parseInt(document.getElementById('input-grandes').value) || 0;
+            const m = parseInt(document.getElementById('input-medio').value) || 0;
+            const d = parseInt(document.getElementById('input-derecha').value) || 0;
+            const total = g + m + d;
+
+            if(!fecha || total === 0) {
+                alert('Por favor seleccione una fecha e ingrese al menos una cantidad de huevos.');
+                return;
+            }
+
+            let index = registros.findIndex(r => r.fecha === fecha);
+            if(index >= 0) {
+                registros[index] = { fecha, usuario: usuarioActual, g, m, d, total, hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) };
+                alert(`¡Registro del ${fecha} actualizado por [${usuarioActual}]!`);
+            } else {
+                registros.push({ fecha, usuario: usuarioActual, g, m, d, total, hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) });
+                alert(`¡Recolección para el ${fecha} guardada con éxito!`);
+            }
+
+            actualizarPantallaResumen();
+            document.getElementById('input-grandes').value = '';
+            document.getElementById('input-medio').value = '';
+            document.getElementById('input-derecha').value = '';
+            document.getElementById('nav-btn-resumen').click();
+        }
+
+        function editarRegistro(fecha) {
+            let r = registros.find(item => item.fecha === fecha);
+            if(r) {
+                document.getElementById('input-fecha').value = r.fecha;
+                document.getElementById('input-grandes').value = r.g;
+                document.getElementById('input-medio').value = r.m;
+                document.getElementById('input-derecha').value = r.d;
+                calcularEnTiempoReal();
+                document.querySelectorAll('.nav-item')[1].click();
+            }
+        }
+
+        function actualizarPantallaResumen() {
+            let totalG = 0, totalM = 0, totalD = 0, totalH = 0;
+            registros.forEach(r => {
+                totalG += r.g;
+                totalM += r.m;
+                totalD += r.d;
+                totalH += r.total;
+            });
+
+            const cantRegistros = registros.length || 1;
+            const pG = Math.round((totalG / (galpones.grandes * cantRegistros)) * 100);
+            const pM = Math.round((totalM / (galpones.medio * cantRegistros)) * 100);
+            const pD = Math.round((totalD / (galpones.derecha * cantRegistros)) * 100);
+
+            document.getElementById('huevos-total').innerText = totalH;
+            document.getElementById('postura-grandes').innerText = isNaN(pG) ? '0%' : pG + '%';
+            document.getElementById('postura-medio').innerText = isNaN(pM) ? '0%' : pM + '%';
+            document.getElementById('postura-derecha').innerText = isNaN(pD) ? '0%' : pD + '%';
+            document.getElementById('cant-grandes').innerText = `(${totalG}h)`;
+            document.getElementById('cant-medio').innerText = `(${totalM}h)`;
+            document.getElementById('cant-derecha').innerText = `(${totalD}h)`;
+
+            const maxVal = Math.max(totalG, totalM, totalD, 10);
+            document.getElementById('barra-g').style.height = Math.max(Math.round((totalG / maxVal) * 100), 5) + '%';
+            document.getElementById('barra-g').innerText = totalG;
+            document.getElementById('barra-m').style.height = Math.max(Math.round((totalM / maxVal) * 100), 5) + '%';
+            document.getElementById('barra-m').innerText = totalM;
+            document.getElementById('barra-d').style.height = Math.max(Math.round((totalD / maxVal) * 100), 5) + '%';
+            document.getElementById('barra-d').innerText = totalD;
+
+            document.getElementById('lista-registros').innerHTML = registros.length === 0 
+                ? '<p style="color: var(--text-light); font-size: 0.9rem; text-align: center; margin: 10px 0;">No hay registros guardados.</p>'
+                : registros.map(r => `
+                    <div class="historial-item">
+                        <span><strong>📅 ${r.fecha}</strong> (${r.usuario}): G:${r.g} | M:${r.m} | D:${r.d} <strong>(Tot: ${r.total})</strong></span>
+                        <button onclick="editarRegistro('${r.fecha}')" style="width: auto; padding: 4px 8px; font-size: 0.75rem; background: #3b82f6;">✏️ Editar</button>
+                    </div>
+                `).join('');
+        }
+
+        function sugerirPrecio() {
+            const select = document.getElementById('venta-tamano');
+            document.getElementById('venta-precio').value = select.value;
+            calcularTotalVenta();
+        }
+
+        function calcularTotalVenta() {
+            const precio = parseFloat(document.getElementById('venta-precio').value) || 0;
+            const cantidad = parseFloat(document.getElementById('venta-cantidad').value) || 0;
+            document.getElementById('venta-total-calc').innerText = (precio * cantidad) + ' Bs';
+        }
+
+        function guardarVenta() {
+            const cliente = document.getElementById('venta-cliente').value.trim();
+            const select = document.getElementById('venta-tamano');
+            const nombreTamano = select.options[select.selectedIndex].text.split(' (')[0];
+            const precio = parseFloat(document.getElementById('venta-precio').value) || 0;
+            const cantidad = parseFloat(document.getElementById('venta-cantidad').value) || 0;
+
+            if(!cliente || !cantidad || cantidad <= 0 || !precio) {
+                alert('Por favor ingrese el cliente, una cantidad y precio válidos.');
+                return;
+            }
+
+            const total = precio * cantidad;
+            ventasRegistradas.push({ cliente, tamano: nombreTamano, precio, cantidad, total, usuario: usuarioActual, hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) });
+
+            document.getElementById('lista-ventas').innerHTML = ventasRegistradas.map(v => `
+                <div class="historial-item">
+                    <span><strong>👤 ${v.cliente}</strong>: ${v.cantidad}x ${v.tamano} (${v.precio} Bs) = <strong>${v.total} Bs</strong></span>
+                    <span style="color: var(--text-light);">${v.hora}</span>
+                </div>
+            `).join('');
+
+            alert(`¡Venta registrada para [${cliente}]! (${total} Bs)`);
+            document.getElementById('venta-cliente').value = '';
+            document.getElementById('venta-cantidad').value = '';
+            document.getElementById('venta-total-calc').innerText = '0 Bs';
+            document.getElementById('nav-btn-resumen').click();
+        }
+
+        function guardarCosto() {
+            const desc = document.getElementById('costo-desc').value;
+            const monto = document.getElementById('costo-monto').value;
+            if(!desc || !monto) {
+                alert('Por favor complete los campos');
+                return;
+            }
+            alert(`¡Costo registrado con éxito por [${usuarioActual}]! (${monto} Bs)`);
+            document.getElementById('costo-desc').value = '';
+            document.getElementById('costo-monto').value = '';
+            document.getElementById('nav-btn-resumen').click();
+        }
+    </script>
+</body>
+</html>
