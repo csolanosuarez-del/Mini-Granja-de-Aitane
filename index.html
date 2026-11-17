@@ -33,7 +33,6 @@
         button:active { background: var(--primary-dark); }
         input, select { width: 100%; padding: 10px 12px; margin-top: 6px; box-sizing: border-box; border: 1px solid var(--border); border-radius: 8px; font-size: 1rem; background: #fff; }
         
-        /* Controles con botones numéricos */
         .input-con-flechas { display: flex; align-items: center; margin-top: 6px; }
         .input-con-flechas input { margin-top: 0; text-align: center; border-radius: 0; border-left: none; border-right: none; }
         .btn-stepper { background: #f3f4f6; color: var(--text); border: 1px solid var(--border); padding: 10px 14px; font-weight: bold; cursor: pointer; font-size: 1.1rem; width: auto; }
@@ -45,10 +44,20 @@
         .bloque-card { background: #fffbeb; border: 1px solid #fde68a; padding: 10px; border-radius: 10px; text-align: center; }
         .bloque-card h4 { margin: 0 0 5px 0; color: #92400e; font-size: 0.9rem; }
         
+        .bloque-card-bajas { background: #fef2f2; border: 1px solid #fecaca; }
+        .bloque-card-bajas h4 { color: #991b1b; }
+
         .grafica-container { display: flex; align-items: flex-end; justify-content: space-around; height: 140px; border-bottom: 2px solid var(--border); padding-bottom: 5px; margin-top: 15px; gap: 15px; }
         .barra-wrapper { display: flex; flex-direction: column; align-items: center; flex: 1; height: 100%; justify-content: flex-end; }
         .barra { width: 100%; max-width: 50px; background: var(--primary); border-radius: 6px 6px 0 0; display: flex; justify-content: center; align-items: flex-start; padding-top: 4px; color: white; font-size: 0.75rem; font-weight: bold; height: 5px; transition: height 0.3s; }
         .barra-label { margin-top: 6px; font-size: 0.8rem; font-weight: bold; color: var(--text-light); }
+
+        /* Gráfica creativa de Finanzas (Barras proporcionales con etiquetas) */
+        .finanzas-grafica-creativa { display: flex; flex-direction: column; gap: 12px; margin-top: 15px; }
+        .fin-barra-item { display: flex; flex-direction: column; gap: 4px; }
+        .fin-barra-info { display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: bold; }
+        .fin-barra-pista { background: #f1f5f9; border-radius: 8px; height: 22px; width: 100%; overflow: hidden; border: 1px solid var(--border); display: flex; }
+        .fin-barra-progreso { height: 100%; border-radius: 6px 0 0 6px; display: flex; align-items: center; padding-left: 8px; color: white; font-size: 0.75rem; font-weight: bold; transition: width 0.4s ease; }
 
         .nav-bottom { position: fixed; bottom: 0; left: 0; right: 0; background: white; display: flex; justify-content: space-around; border-top: 1px solid var(--border); padding: 8px 0; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); z-index: 9999; }
         .nav-item { text-align: center; color: var(--text-light); text-decoration: none; font-size: 0.70rem; font-weight: 600; background: none; border: none; cursor: pointer; padding: 4px; flex: 1; }
@@ -85,12 +94,13 @@
         <div id="sec-resumen" class="seccion active" style="display: block;">
             <div class="card">
                 <h3>📊 Resumen del Día por Galpón</h3>
-                <p style="margin-bottom: 8px;">Total huevos recolectados: <strong id="huevos-total" style="font-size: 1.1rem; color: var(--primary);">0</strong></p>
+                <p style="margin-bottom: 4px;">Total huevos recolectados: <strong id="huevos-total" style="font-size: 1.1rem; color: var(--primary);">0</strong></p>
+                <p style="margin-bottom: 8px; font-size: 0.85rem; color: #dc2626;">Total bajas / muertes registradas: <strong id="bajas-total">0</strong></p>
                 <hr style="border: none; border-top: 1px solid var(--border); margin: 10px 0;">
                 <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; text-align: center; font-size: 0.85rem;">
-                    <div><strong>Grandes:</strong><br><span id="postura-grandes" style="color: var(--primary);">0%</span><br><small id="cant-grandes" style="color:#6b7280;">(0h)</small></div>
-                    <div><strong>Medio:</strong><br><span id="postura-medio" style="color: var(--primary);">0%</span><br><small id="cant-medio" style="color:#6b7280;">(0h)</small></div>
-                    <div><strong>Derecha:</strong><br><span id="postura-derecha" style="color: var(--primary);">0%</span><br><small id="cant-derecha" style="color:#6b7280;">(0h)</small></div>
+                    <div><strong>Grandes:</strong><br><span id="postura-grandes" style="color: var(--primary);">0%</span><br><small id="cant-grandes" style="color:#6b7280;">(0h)</small><br><small style="color:#dc2626;" id="activas-grandes">(35 gallinas)</small></div>
+                    <div><strong>Medio:</strong><br><span id="postura-medio" style="color: var(--primary);">0%</span><br><small id="cant-medio" style="color:#6b7280;">(0h)</small><br><small style="color:#dc2626;" id="activas-medio">(35 gallinas)</small></div>
+                    <div><strong>Derecha:</strong><br><span id="postura-derecha" style="color: var(--primary);">0%</span><br><small id="cant-derecha" style="color:#6b7280;">(0h)</small><br><small style="color:#dc2626;" id="activas-derecha">(30 gallinas)</small></div>
                 </div>
             </div>
 
@@ -123,11 +133,12 @@
         <!-- SECCION PRODUCCION -->
         <div id="sec-produccion" class="seccion" style="display: none;">
             <div class="card">
-                <h3>🥚 Registrar o Editar Recolección</h3>
+                <h3>🥚 Registrar o Editar Recolección y Bajas</h3>
                 
                 <label style="margin-top: 5px; display: block; font-size: 0.9rem;">Fecha del registro:</label>
                 <input type="date" id="input-fecha" style="margin-bottom: 12px;">
 
+                <p style="font-size: 0.85rem; font-weight: bold; color: var(--primary-dark); margin-bottom: 5px;">Huevos Recolectados:</p>
                 <div class="bloque-grid">
                     <div class="bloque-card">
                         <h4>Grandes</h4>
@@ -155,7 +166,35 @@
                     </div>
                 </div>
 
-                <button onclick="guardarProduccion()" style="margin-top: 5px;">💾 Guardar / Actualizar Recolección</button>
+                <p style="font-size: 0.85rem; font-weight: bold; color: #dc2626; margin-bottom: 5px;">Mortalidad / Bajas del día (Resta gallinas):</p>
+                <div class="bloque-grid">
+                    <div class="bloque-card bloque-card-bajas">
+                        <h4>B. Grandes</h4>
+                        <div class="input-con-flechas">
+                            <button class="btn-stepper btn-stepper-left" onclick="ajustarValor('baja-grandes', -1)">-</button>
+                            <input type="number" id="baja-grandes" value="0" style="text-align: center;">
+                            <button class="btn-stepper btn-stepper-right" onclick="ajustarValor('baja-grandes', 1)">+</button>
+                        </div>
+                    </div>
+                    <div class="bloque-card bloque-card-bajas">
+                        <h4>B. Medio</h4>
+                        <div class="input-con-flechas">
+                            <button class="btn-stepper btn-stepper-left" onclick="ajustarValor('baja-medio', -1)">-</button>
+                            <input type="number" id="baja-medio" value="0" style="text-align: center;">
+                            <button class="btn-stepper btn-stepper-right" onclick="ajustarValor('baja-medio', 1)">+</button>
+                        </div>
+                    </div>
+                    <div class="bloque-card bloque-card-bajas">
+                        <h4>B. Derecha</h4>
+                        <div class="input-con-flechas">
+                            <button class="btn-stepper btn-stepper-left" onclick="ajustarValor('baja-derecha', -1)">-</button>
+                            <input type="number" id="baja-derecha" value="0" style="text-align: center;">
+                            <button class="btn-stepper btn-stepper-right" onclick="ajustarValor('baja-derecha', 1)">+</button>
+                        </div>
+                    </div>
+                </div>
+
+                <button onclick="guardarProduccion()" style="margin-top: 5px;">💾 Guardar / Actualizar Registro</button>
             </div>
         </div>
 
@@ -236,7 +275,7 @@
         <div id="sec-finanzas" class="seccion" style="display: none;">
             <div class="card">
                 <h3>📈 Balance Financiero y Utilidad</h3>
-                <p style="font-size: 0.85rem; color: var(--text-light); margin-bottom: 15px;">Resumen general de ingresos por ventas menos costos de producción.</p>
+                <p style="font-size: 0.85rem; color: var(--text-light); margin-bottom: 15px;">Resumen gráfico de tus ingresos, costos y utilidad neta.</p>
                 
                 <div class="finanzas-grid">
                     <div class="finanza-box">
@@ -250,6 +289,42 @@
                     <div class="finanza-box utilidad">
                         <span>⭐ Utilidad Neta (Margen):</span>
                         <strong id="fin-utilidad" style="color: #047857; font-size: 1.2rem;">0 Bs</strong>
+                    </div>
+                </div>
+
+                <!-- Gráfica creativa con etiquetas de datos -->
+                <div style="margin-top: 20px; border-top: 1px solid var(--border); padding-top: 15px;">
+                    <h4 style="margin: 0 0 10px 0; font-size: 0.95rem; color: var(--primary-dark);">📊 Representación Visual del Negocio</h4>
+                    <div class="finanzas-grafica-creativa">
+                        <div class="fin-barra-item">
+                            <div class="fin-barra-info">
+                                <span style="color: #059669;">Ingresos</span>
+                                <span id="lbl-porc-ingresos">0%</span>
+                            </div>
+                            <div class="fin-barra-pista">
+                                <div id="bar-ingresos" class="fin-barra-progreso" style="width: 0%; background: #059669;">0 Bs</div>
+                            </div>
+                        </div>
+
+                        <div class="fin-barra-item">
+                            <div class="fin-barra-info">
+                                <span style="color: #dc2626;">Costos</span>
+                                <span id="lbl-porc-costos">0%</span>
+                            </div>
+                            <div class="fin-barra-pista">
+                                <div id="bar-costos" class="fin-barra-progreso" style="width: 0%; background: #dc2626;">0 Bs</div>
+                            </div>
+                        </div>
+
+                        <div class="fin-barra-item">
+                            <div class="fin-barra-info">
+                                <span style="color: #047857;">Utilidad Neta</span>
+                                <span id="lbl-porc-utilidad">0%</span>
+                            </div>
+                            <div class="fin-barra-pista">
+                                <div id="bar-utilidad" class="fin-barra-progreso" style="width: 0%; background: #10b981;">0 Bs</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -272,13 +347,13 @@
             <label>Código de Sala / Nube:</label>
             <input type="text" id="input-sala" value="granja-isa-scz-2026">
             
-            <label style="margin-top: 10px; display: block;">Gallinas en "Grandes":</label>
+            <label style="margin-top: 10px; display: block;">Gallinas Iniciales "Grandes":</label>
             <input type="number" id="gallinas-grandes" value="35">
             
-            <label style="margin-top: 10px; display: block;">Gallinas en "Medio":</label>
+            <label style="margin-top: 10px; display: block;">Gallinas Iniciales "Medio":</label>
             <input type="number" id="gallinas-medio" value="35">
             
-            <label style="margin-top: 10px; display: block;">Gallinas en "Derecha":</label>
+            <label style="margin-top: 10px; display: block;">Gallinas Iniciales "Derecha":</label>
             <input type="number" id="gallinas-derecha" value="30">
 
             <div style="display: flex; gap: 10px; margin-top: 20px;">
@@ -293,7 +368,7 @@
         let registros = [];
         let ventasRegistradas = [];
         let costosRegistrados = [];
-        let galpones = { grandes: 35, medio: 35, derecha: 30 };
+        let galponesBase = { grandes: 35, medio: 35, derecha: 30 };
 
         document.getElementById('input-fecha').value = new Date().toISOString().split('T')[0];
 
@@ -337,23 +412,35 @@
         function cerrarAjustes() { document.getElementById('modal-ajustes').style.display = 'none'; }
 
         function guardarAjustes() {
-            galpones.grandes = parseInt(document.getElementById('gallinas-grandes').value) || 1;
-            galpones.medio = parseInt(document.getElementById('gallinas-medio').value) || 1;
-            galpones.derecha = parseInt(document.getElementById('gallinas-derecha').value) || 1;
+            galponesBase.grandes = parseInt(document.getElementById('gallinas-grandes').value) || 1;
+            galponesBase.medio = parseInt(document.getElementById('gallinas-medio').value) || 1;
+            galponesBase.derecha = parseInt(document.getElementById('gallinas-derecha').value) || 1;
             alert('¡Configuración guardada correctamente!');
             cerrarAjustes();
             actualizarPantallaResumen();
         }
 
         function calcularEnTiempoReal() {
+            // Calcular gallinas actuales restando el acumulado total de bajas
+            let bajasG = 0, bajasM = 0, bajasD = 0;
+            registros.forEach(r => {
+                bajasG += (r.bg || 0);
+                bajasM += (r.bm || 0);
+                bajasD += (r.bd || 0);
+            });
+
+            const actG = Math.max(galponesBase.grandes - bajasG, 1);
+            const actM = Math.max(galponesBase.medio - bajasM, 1);
+            const actD = Math.max(galponesBase.derecha - bajasD, 1);
+
             const g = parseInt(document.getElementById('input-grandes').value) || 0;
             const m = parseInt(document.getElementById('input-medio').value) || 0;
             const d = parseInt(document.getElementById('input-derecha').value) || 0;
             const total = g + m + d;
 
-            const pG = Math.round((g / galpones.grandes) * 100);
-            const pM = Math.round((m / galpones.medio) * 100);
-            const pD = Math.round((d / galpones.derecha) * 100);
+            const pG = Math.round((g / actG) * 100);
+            const pM = Math.round((m / actM) * 100);
+            const pD = Math.round((d / actD) * 100);
 
             document.getElementById('huevos-total').innerText = total;
             document.getElementById('postura-grandes').innerText = pG + '%';
@@ -370,26 +457,37 @@
             const g = parseInt(document.getElementById('input-grandes').value) || 0;
             const m = parseInt(document.getElementById('input-medio').value) || 0;
             const d = parseInt(document.getElementById('input-derecha').value) || 0;
-            const total = g + m + d;
+            
+            const bg = parseInt(document.getElementById('baja-grandes').value) || 0;
+            const bm = parseInt(document.getElementById('baja-medio').value) || 0;
+            const bd = parseInt(document.getElementById('baja-derecha').value) || 0;
 
-            if(!fecha || total === 0) {
-                alert('Por favor seleccione una fecha e ingrese al menos una cantidad de huevos.');
+            const totalH = g + m + d;
+            const totalB = bg + bm + bd;
+
+            if(!fecha || (totalH === 0 && totalB === 0)) {
+                alert('Por favor seleccione una fecha e ingrese huevos o bajas.');
                 return;
             }
 
             let index = registros.findIndex(r => r.fecha === fecha);
+            const dataReg = { fecha, usuario: usuarioActual, g, m, d, bg, bm, bd, total: totalH, hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) };
+
             if(index >= 0) {
-                registros[index] = { fecha, usuario: usuarioActual, g, m, d, total, hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) };
+                registros[index] = dataReg;
                 alert(`¡Registro del ${fecha} actualizado por [${usuarioActual}]!`);
             } else {
-                registros.push({ fecha, usuario: usuarioActual, g, m, d, total, hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) });
-                alert(`¡Recolección para el ${fecha} guardada con éxito!`);
+                registros.push(dataReg);
+                alert(`¡Registro para el ${fecha} guardado con éxito!`);
             }
 
             actualizarPantallaResumen();
             document.getElementById('input-grandes').value = 0;
             document.getElementById('input-medio').value = 0;
             document.getElementById('input-derecha').value = 0;
+            document.getElementById('baja-grandes').value = 0;
+            document.getElementById('baja-medio').value = 0;
+            document.getElementById('baja-derecha').value = 0;
             document.getElementById('nav-btn-resumen').click();
         }
 
@@ -400,24 +498,46 @@
                 document.getElementById('input-grandes').value = r.g;
                 document.getElementById('input-medio').value = r.m;
                 document.getElementById('input-derecha').value = r.d;
+                document.getElementById('baja-grandes').value = r.bg || 0;
+                document.getElementById('baja-medio').value = r.bm || 0;
+                document.getElementById('baja-derecha').value = r.bd || 0;
                 calcularEnTiempoReal();
                 document.querySelectorAll('.nav-item')[1].click();
             }
         }
 
         function actualizarPantallaResumen() {
-            let totalG = 0, totalM = 0, totalD = 0, totalH = 0;
+            let totalG = 0, totalM = 0, totalD = 0, totalH = 0, totalBajas = 0;
+            let sumBajasG = 0, sumBajasM = 0, sumBajasD = 0;
+
             registros.forEach(r => {
                 totalG += r.g;
                 totalM += r.m;
                 totalD += r.d;
                 totalH += r.total;
+                totalBajas += ((r.bg || 0) + (r.bm || 0) + (r.bd || 0));
+                sumBajasG += (r.bg || 0);
+                sumBajasM += (r.bm || 0);
+                sumBajasD += (r.bd || 0);
             });
 
+            const actG = Math.max(galponesBase.grandes - sumBajasG, 0);
+            const actM = Math.max(galponesBase.medio - sumBajasM, 0);
+            const actD = Math.max(galponesBase.derecha - sumBajasD, 0);
+
+            document.getElementById('activas-grandes').innerText = `(${actG} gallinas)`;
+            document.getElementById('activas-medio').innerText = `(${actM} gallinas)`;
+            document.getElementById('activas-derecha').innerText = `(${actD} gallinas)`;
+            document.getElementById('bajas-total').innerText = totalBajas;
+
             const cantRegistros = registros.length || 1;
-            const pG = Math.round((totalG / (galpones.grandes * cantRegistros)) * 100);
-            const pM = Math.round((totalM / (galpones.medio * cantRegistros)) * 100);
-            const pD = Math.round((totalD / (galpones.derecha * cantRegistros)) * 100);
+            const baseGPromedio = Math.max(actG, 1);
+            const baseMPromedio = Math.max(actM, 1);
+            const baseDPromedio = Math.max(actD, 1);
+
+            const pG = Math.round((totalG / (baseGPromedio * cantRegistros)) * 100);
+            const pM = Math.round((totalM / (baseMPromedio * cantRegistros)) * 100);
+            const pD = Math.round((totalD / (baseDPromedio * cantRegistros)) * 100);
 
             document.getElementById('huevos-total').innerText = totalH;
             document.getElementById('postura-grandes').innerText = isNaN(pG) ? '0%' : pG + '%';
@@ -439,8 +559,8 @@
                 ? '<p style="color: var(--text-light); font-size: 0.9rem; text-align: center; margin: 10px 0;">No hay registros guardados.</p>'
                 : registros.map(r => `
                     <div class="historial-item">
-                        <span><strong>📅 ${r.fecha}</strong> (${r.usuario}): G:${r.g} | M:${r.m} | D:${r.d} <strong>(Tot: ${r.total})</strong></span>
-                        <button onclick="editarRegistro('${r.fecha}')" style="width: auto; padding: 4px 8px; font-size: 0.75rem; background: #3b82f6;">✏️ Editar</button>
+                        <span><strong>📅 ${r.fecha}</strong> (${r.usuario}): H:[G:${r.g} M:${r.m} D:${r.d}] | Bajas:[${(r.bg||0)+(r.bm||0)+(r.bd||0)}]</span>
+                        <button onclick="editarRegistro('${r.fecha}')" style="width: auto; padding: 4px 8px; font-size: 0.75rem; background: #3b82f6;">✏️</button>
                     </div>
                 `).join('');
         }
@@ -467,14 +587,12 @@
             const total = precio * cantidad;
 
             if(editId !== "") {
-                // Editando venta existente
                 ventasRegistradas[editId] = { cliente, tamano, precio, cantidad, total, condicion, usuario: usuarioActual, hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) };
                 document.getElementById('edit-venta-id').value = "";
                 document.getElementById('titulo-venta-form').innerText = "💰 Registro de Ventas";
                 document.getElementById('btn-guardar-venta').innerText = "💾 Registrar Venta";
                 alert(`¡Venta de [${cliente}] actualizada con éxito!`);
             } else {
-                // Nueva venta
                 ventasRegistradas.push({ cliente, tamano, precio, cantidad, total, condicion, usuario: usuarioActual, hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) });
                 alert(`¡Venta registrada para [${cliente}]! (${total} Bs - ${condicion})`);
             }
@@ -513,7 +631,6 @@
                 document.getElementById('titulo-venta-form').innerText = "✏️ Editando Venta";
                 document.getElementById('btn-guardar-venta').innerText = "💾 Actualizar Venta";
 
-                // Ir a la pestaña de ventas
                 document.querySelectorAll('.nav-item')[2].click();
             }
         }
@@ -556,6 +673,26 @@
             const utilidadEl = document.getElementById('fin-utilidad');
             utilidadEl.innerText = utilidad + ' Bs';
             utilidadEl.style.color = utilidad >= 0 ? '#047857' : '#dc2626';
+
+            // Gráfica creativa con porcentajes y etiquetas de datos
+            const maxFin = Math.max(totalIngresos, totalCostos, Math.abs(utilidad), 1);
+            const pIng = Math.round((totalIngresos / maxFin) * 100);
+            const pCos = Math.round((totalCostos / maxFin) * 100);
+            const pUti = Math.round((Math.max(utilidad, 0) / maxFin) * 100);
+
+            document.getElementById('bar-ingresos').style.width = Math.max(pIng, 5) + '%';
+            document.getElementById('bar-ingresos').innerText = totalIngresos + ' Bs';
+            document.getElementById('lbl-porc-ingresos').innerText = totalIngresos > 0 ? '100%' : '0%';
+
+            document.getElementById('bar-costos').style.width = Math.max(pCos, 5) + '%';
+            document.getElementById('bar-costos').innerText = totalCostos + ' Bs';
+            document.getElementById('lbl-porc-costos').innerText = totalIngresos > 0 ? Math.round((totalCostos / (totalIngresos || 1)) * 100) + '%' : '0%';
+
+            const barUti = document.getElementById('bar-utilidad');
+            barUti.style.width = Math.max(pUti, 5) + '%';
+            barUti.innerText = utilidad + ' Bs';
+            barUti.style.background = utilidad >= 0 ? '#10b981' : '#dc2626';
+            document.getElementById('lbl-porc-utilidad').innerText = totalIngresos > 0 ? Math.round((utilidad / (totalIngresos || 1)) * 100) + '%' : '0%';
         }
     </script>
 </body>
