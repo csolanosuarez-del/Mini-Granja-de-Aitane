@@ -242,7 +242,6 @@
 
     <!-- Script Principal con Firebase -->
     <script>
-        // Configuración de Firebase (Conectado a tu base de datos)
         const firebaseConfig = {
             databaseURL: "https://mini-granja-de-aitane-default-rtdb.firebaseio.com/"
         };
@@ -259,11 +258,16 @@
 
         let chartInstance = null;
 
-        // Escuchar cambios en tiempo real desde Firebase
+        // Escuchar cambios en tiempo real
         db.ref('granja').on('value', (snapshot) => {
             const data = snapshot.val();
             if (data) {
-                dbData = data;
+                dbData = {
+                    galpones: data.galpones || dbData.galpones,
+                    registros: data.registros || [],
+                    ventas: data.ventas || [],
+                    costos: data.costos || []
+                };
                 document.getElementById('sync-status').innerText = "🟢 En línea";
                 document.getElementById('sync-status').className = "text-xs bg-emerald-600 px-2 py-1 rounded-full font-semibold";
             } else {
@@ -271,15 +275,17 @@
             }
             actualizarPantalla();
         }, (error) => {
-            document.getElementById('sync-status').innerText = "🔴 Sin conexión";
+            console.error("Error de Firebase:", error);
+            document.getElementById('sync-status').innerText = "🔴 Error sinc";
             document.getElementById('sync-status').className = "text-xs bg-rose-600 px-2 py-1 rounded-full font-semibold";
         });
 
         function guardarEnFirebase() {
-            db.ref('granja').set(dbData);
+            db.ref('granja').set(dbData).catch(err => {
+                alert("Error al guardar en Firebase: " + err.message);
+            });
         }
 
-        // Establecer fecha de hoy por defecto en los formularios
         document.addEventListener("DOMContentLoaded", () => {
             const hoy = new Date().toISOString().split('T')[0];
             document.getElementById('prod-fecha').value = hoy;
@@ -321,6 +327,7 @@
                 derecha: parseInt(document.getElementById('prod-derecha').value) || 0,
                 bajasDerecha: parseInt(document.getElementById('bajas-derecha').value) || 0,
             };
+            if (!dbData.registros) dbData.registros = [];
             dbData.registros.push(nuevoRegistro);
             guardarEnFirebase();
             alert("¡Registro guardado y sincronizado con éxito!");
@@ -340,6 +347,7 @@
                 monto: parseFloat(document.getElementById('venta-monto').value) || 0,
                 tipo: document.getElementById('venta-tipo').value
             };
+            if (!dbData.ventas) dbData.ventas = [];
             dbData.ventas.push(nuevaVenta);
             guardarEnFirebase();
             alert("¡Venta registrada y sincronizada!");
@@ -357,6 +365,7 @@
                 concepto: document.getElementById('costo-concepto').value,
                 monto: parseFloat(document.getElementById('costo-monto').value) || 0
             };
+            if (!dbData.costos) dbData.costos = [];
             dbData.costos.push(nuevoCosto);
             guardarEnFirebase();
             alert("¡Gasto registrado y sincronizado!");
@@ -389,20 +398,20 @@
         function actualizarPantalla() {
             const hoy = new Date().toISOString().split('T')[0];
             
-            // Calcular totales de hoy
             let huevosHoy = 0;
             let bajasHoy = 0;
-            dbData.registros.filter(r => r.fecha === hoy).forEach(r => {
-                huevosHoy += (r.grandes + r.medio + r.derecha);
-                bajasHoy += (r.bajasGrandes + r.bajasMedio + r.bajasDerecha);
-            });
+            if (dbData.registros) {
+                dbData.registros.filter(r => r.fecha === hoy).forEach(r => {
+                    huevosHoy += (r.grandes + r.medio + r.derecha);
+                    bajasHoy += (r.bajasGrandes + r.bajasMedio + r.bajasDerecha);
+                });
+            }
 
             document.getElementById('resumen-huevos-hoy').innerText = huevosHoy;
             document.getElementById('resumen-bajas-hoy').innerText = bajasHoy;
 
-            // Calcular Finanzas
-            let totalIngresos = dbData.ventas.reduce((acc, v) => acc + v.monto, 0);
-            let totalGastos = dbData.costos.reduce((acc, c) => acc + c.monto, 0);
+            let totalIngresos = dbData.ventas ? dbData.ventas.reduce((acc, v) => acc + v.monto, 0) : 0;
+            let totalGastos = dbData.costos ? dbData.costos.reduce((acc, c) => acc + c.monto, 0) : 0;
             let utilidad = totalIngresos - totalGastos;
 
             document.getElementById('fin-ingresos').innerText = totalIngresos.toFixed(2) + " Bs";
@@ -414,13 +423,14 @@
 
         function actualizarGrafico() {
             const ctx = document.getElementById('graficoProduccion').getContext('2d');
-            
-            // Agrupar huevos por fecha
             const ultimosDias = {};
-            dbData.registros.forEach(r => {
-                const totalH = r.grandes + r.medio + r.derecha;
-                ultimosDias[r.fecha] = (ultimosDias[r.fecha] || 0) + totalH;
-            });
+            
+            if (dbData.registros) {
+                dbData.registros.forEach(r => {
+                    const totalH = r.grandes + r.medio + r.derecha;
+                    ultimosDias[r.fecha] = (ultimosDias[r.fecha] || 0) + totalH;
+                });
+            }
 
             const fechas = Object.keys(ultimosDias).sort().slice(-7);
             const totales = fechas.map(f => ultimosDias[f]);
