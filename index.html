@@ -73,6 +73,34 @@
                 </div>
                 <canvas id="graficoProduccion" height="120"></canvas>
             </div>
+
+            <!-- Historial Detallado y Buscador por Fecha -->
+            <div class="bg-white rounded-2xl p-5 shadow-sm border border-amber-100 space-y-3">
+                <div class="flex justify-between items-center flex-wrap gap-2">
+                    <h3 class="text-md font-bold text-amber-900">📋 Historial de Registros y Días Especificos</h3>
+                    <div class="flex items-center gap-2">
+                        <input type="date" id="filtro-fecha" onchange="actualizarTablaHistorial()" class="p-2 border rounded-xl bg-slate-50 text-xs outline-none">
+                        <button onclick="limpiarFiltroFecha()" class="bg-slate-200 hover:bg-slate-300 px-3 py-2 rounded-xl text-xs font-semibold transition">Ver Todos</button>
+                    </div>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs">
+                        <thead>
+                            <tr class="bg-amber-100 text-amber-900 border-b border-amber-200">
+                                <th class="p-2.5 rounded-l-lg">Fecha / Usuario</th>
+                                <th class="p-2.5">Grandes (H / B)</th>
+                                <th class="p-2.5">Medio (H / B)</th>
+                                <th class="p-2.5">Derecha (H / B)</th>
+                                <th class="p-2.5 text-center">Total Huevos</th>
+                                <th class="p-2.5 text-center rounded-r-lg">Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabla-historial-cuerpo" class="divide-y divide-slate-100">
+                            <!-- Los registros se cargan dinámicamente aquí -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
 
         <!-- 2. PRODUCCIÓN -->
@@ -247,7 +275,7 @@
         </div>
     </div>
 
-    <!-- Script Principal con Firebase y Selector de Gráfica -->
+    <!-- Script Principal con Firebase, Selector de Gráfica e Historial -->
     <script>
         const firebaseConfig = {
             databaseURL: "https://mini-granja-de-aitane-default-rtdb.firebaseio.com/"
@@ -256,7 +284,7 @@
         const db = firebase.database();
 
         let usuarioActual = "Mamá";
-        let vistaGraficaActual = "diario"; // 'diario', 'semanal', 'mensual'
+        let vistaGraficaActual = "diario";
         let dbData = {
             galpones: { grandes: 100, medio: 80, derecha: 200 },
             registros: [],
@@ -353,6 +381,18 @@
             cambiarTab('resumen');
         }
 
+        function eliminarRegistro(id) {
+            if (confirm("¿Estás seguro de eliminar este registro?")) {
+                dbData.registros = dbData.registros.filter(r => r.id !== id);
+                guardarEnFirebase();
+            }
+        }
+
+        function limpiarFiltroFecha() {
+            document.getElementById('filtro-fecha').value = '';
+            actualizarTablaHistorial();
+        }
+
         function guardarVenta(e) {
             e.preventDefault();
             const nuevaVenta = {
@@ -436,6 +476,49 @@
             document.getElementById('fin-utilidad').innerText = utilidad.toFixed(2) + " Bs";
 
             actualizarGrafico();
+            actualizarTablaHistorial();
+        }
+
+        function actualizarTablaHistorial() {
+            const tbody = document.getElementById('tabla-historial-cuerpo');
+            tbody.innerHTML = '';
+
+            if (!dbData.registros || dbData.registros.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-slate-400">No hay registros guardados todavía.</td></tr>`;
+                return;
+            }
+
+            const fechaFiltro = document.getElementById('filtro-fecha').value;
+            let registrosOrdenados = [...dbData.registros].sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+
+            if (fechaFiltro) {
+                registrosOrdenados = registrosOrdenados.filter(r => r.fecha === fechaFiltro);
+            }
+
+            if (registrosOrdenados.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-slate-400">No hay registros para la fecha seleccionada.</td></tr>`;
+                return;
+            }
+
+            registrosOrdenados.forEach(r => {
+                const totalHuevosGalpones = r.grandes + r.medio + r.derecha;
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-amber-50/50 transition border-b border-slate-100";
+                tr.innerHTML = `
+                    <td class="p-2.5 font-medium">
+                        <div class="text-amber-900 font-bold">${r.fecha}</div>
+                        <div class="text-[10px] text-slate-500">Por: ${r.usuario || 'Mamá'}</div>
+                    </td>
+                    <td class="p-2.5">${r.grandes} <span class="text-rose-600 text-[10px]">(${r.bajasGrandes})</span></td>
+                    <td class="p-2.5">${r.medio} <span class="text-rose-600 text-[10px]">(${r.bajasMedio})</span></td>
+                    <td class="p-2.5">${r.derecha} <span class="text-rose-600 text-[10px]">(${r.bajasDerecha})</span></td>
+                    <td class="p-2.5 text-center font-bold text-amber-900">${totalHuevosGalpones}</td>
+                    <td class="p-2.5 text-center">
+                        <button onclick="eliminarRegistro(${r.id})" class="bg-rose-100 hover:bg-rose-200 text-rose-700 px-2 py-1 rounded-lg text-[10px] font-bold transition">🗑️ Borrar</button>
+                    </td>
+                `;
+                tbody.appendChild(tbody.appendChild ? tr : null);
+            });
         }
 
         function actualizarGrafico() {
@@ -445,12 +528,11 @@
             if (dbData.registros) {
                 dbData.registros.forEach(r => {
                     const totalH = r.grandes + r.medio + r.derecha;
-                    let clave = r.fecha; // Por defecto diario
+                    let clave = r.fecha;
 
                     if (vistaGraficaActual === 'mensual') {
-                        clave = r.fecha.substring(0, 7); // Agrupa por Año-Mes (ej. 2026-11)
+                        clave = r.fecha.substring(0, 7);
                     } else if (vistaGraficaActual === 'semanal') {
-                        // Cálculo simple de año y semana o mes agrupado
                         const d = new Date(r.fecha);
                         const año = d.getFullYear();
                         const unaSemana = 1000 * 60 * 60 * 24 * 7;
