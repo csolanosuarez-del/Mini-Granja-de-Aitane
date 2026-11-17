@@ -42,13 +42,17 @@
         .barra-label { margin-top: 6px; font-size: 0.8rem; font-weight: bold; color: var(--text-light); }
 
         .nav-bottom { position: fixed; bottom: 0; left: 0; right: 0; background: white; display: flex; justify-content: space-around; border-top: 1px solid var(--border); padding: 8px 0; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); z-index: 9999; }
-        .nav-item { text-align: center; color: var(--text-light); text-decoration: none; font-size: 0.75rem; font-weight: 600; background: none; border: none; cursor: pointer; padding: 4px; flex: 1; }
+        .nav-item { text-align: center; color: var(--text-light); text-decoration: none; font-size: 0.70rem; font-weight: 600; background: none; border: none; cursor: pointer; padding: 4px; flex: 1; }
         .nav-item.active { color: var(--primary); }
         .modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 10000; justify-content: center; align-items: center; padding: 20px; }
         .modal-content { background: white; padding: 20px; border-radius: 14px; width: 100%; max-width: 400px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); }
         .seccion { display: none; }
         .seccion.active { display: block; }
         .historial-item { font-size: 0.85rem; padding: 8px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+        
+        .finanzas-grid { display: grid; grid-template-columns: 1fr; gap: 10px; margin-top: 10px; }
+        .finanza-box { background: #f8fafc; border: 1px solid var(--border); padding: 12px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; }
+        .finanza-box.utilidad { background: #ecfdf5; border-color: #a7f3d0; }
     </style>
 </head>
 <body>
@@ -68,6 +72,7 @@
             <button class="user-btn" onclick="selectUser(this, 'Jeanine')">👩‍💼 Jeanine</button>
         </div>
 
+        <!-- SECCION RESUMEN -->
         <div id="sec-resumen" class="seccion active" style="display: block;">
             <div class="card">
                 <h3>📊 Resumen del Día por Galpón</h3>
@@ -106,6 +111,7 @@
             </div>
         </div>
 
+        <!-- SECCION PRODUCCION -->
         <div id="sec-produccion" class="seccion" style="display: none;">
             <div class="card">
                 <h3>🥚 Registrar o Editar Recolección</h3>
@@ -132,30 +138,35 @@
             </div>
         </div>
 
+        <!-- SECCION VENTAS -->
         <div id="sec-ventas" class="seccion" style="display: none;">
             <div class="card">
-                <h3>💰 Registro de Ventas por Categoría</h3>
+                <h3>💰 Registro de Ventas</h3>
 
                 <label style="margin-top: 5px; display: block; font-size: 0.9rem;">Nombre del Cliente:</label>
                 <input type="text" id="venta-cliente" placeholder="Ej. Juan Pérez" style="margin-bottom: 10px;">
                 
-                <label style="display: block; font-size: 0.9rem;">Categoría / Tamaño:</label>
-                <select id="venta-tamano" onchange="sugerirPrecio()">
-                    <option value="35">Extras (35 Bs)</option>
-                    <option value="32">Jumbos (32 Bs)</option>
-                    <option value="28">Primera (28 Bs)</option>
-                    <option value="26">Segunda (26 Bs)</option>
-                    <option value="24">Tercera (24 Bs)</option>
-                    <option value="22">Cuarta (22 Bs)</option>
+                <label style="display: block; font-size: 0.9rem;">Categoría / Descripción:</label>
+                <input type="text" id="venta-tamano" placeholder="Ej. Cartón Extra, 30 unidades, etc." style="margin-bottom: 10px;">
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <div>
+                        <label style="display: block; font-size: 0.9rem;">Precio Unit. (Bs):</label>
+                        <input type="number" id="venta-precio" placeholder="0" oninput="calcularTotalVenta()" style="text-align: center; font-weight: bold; color: var(--primary);">
+                    </div>
+                    <div>
+                        <label style="display: block; font-size: 0.9rem;">Cantidad:</label>
+                        <input type="number" id="venta-cantidad" placeholder="0" oninput="calcularTotalVenta()" style="text-align: center;">
+                    </div>
+                </div>
+
+                <label style="margin-top: 10px; display: block; font-size: 0.9rem;">Condición de Pago:</label>
+                <select id="venta-condicion" style="margin-bottom: 10px;">
+                    <option value="Contado">💵 Al Contado</option>
+                    <option value="Crédito">⏳ Al Crédito</option>
                 </select>
 
-                <label style="margin-top: 10px; display: block; font-size: 0.9rem;">Precio unitario (Bs) [Editable]:</label>
-                <input type="number" id="venta-precio" value="35" oninput="calcularTotalVenta()" style="text-align: center; font-weight: bold; color: var(--primary);">
-
-                <label style="margin-top: 10px; display: block; font-size: 0.9rem;">Cantidad:</label>
-                <input type="number" id="venta-cantidad" placeholder="Ej. 2" oninput="calcularTotalVenta()" style="text-align: center;">
-
-                <p style="margin-top: 12px; font-size: 1rem;">Total a cobrar: <strong id="venta-total-calc" style="color: var(--primary); font-size: 1.2rem;">0 Bs</strong></p>
+                <p style="margin-top: 5px; font-size: 1rem;">Total a cobrar: <strong id="venta-total-calc" style="color: var(--primary); font-size: 1.2rem;">0 Bs</strong></p>
 
                 <button onclick="guardarVenta()" style="margin-top: 10px;">💾 Registrar Venta</button>
             </div>
@@ -168,6 +179,7 @@
             </div>
         </div>
 
+        <!-- SECCION COSTOS -->
         <div id="sec-costos" class="seccion" style="display: none;">
             <div class="card">
                 <h3>📋 Registro de Costos / Alimento</h3>
@@ -177,16 +189,49 @@
                 <input type="number" id="costo-monto" placeholder="Ej. 250">
                 <button onclick="guardarCosto()" style="margin-top: 15px;">💾 Guardar Costo</button>
             </div>
+
+            <div class="card">
+                <h3>📜 Historial de Costos</h3>
+                <div id="lista-costos" style="max-height: 150px; overflow-y: auto;">
+                    <p style="color: var(--text-light); font-size: 0.9rem; text-align: center; margin: 10px 0;">No hay costos registrados.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECCION FINANZAS / MARGEN -->
+        <div id="sec-finanzas" class="seccion" style="display: none;">
+            <div class="card">
+                <h3>📈 Balance Financiero y Utilidad</h3>
+                <p style="font-size: 0.85rem; color: var(--text-light); margin-bottom: 15px;">Resumen general de ingresos por ventas menos costos de producción.</p>
+                
+                <div class="finanzas-grid">
+                    <div class="finanza-box">
+                        <span>💰 Total Ingresos Ventas:</span>
+                        <strong id="fin-ingresos" style="color: #059669; font-size: 1.1rem;">0 Bs</strong>
+                    </div>
+                    <div class="finanza-box">
+                        <span>📋 Total Costos / Gastos:</span>
+                        <strong id="fin-costos" style="color: #dc2626; font-size: 1.1rem;">0 Bs</strong>
+                    </div>
+                    <div class="finanza-box utilidad">
+                        <span>⭐ Utilidad Neta (Margen):</span>
+                        <strong id="fin-utilidad" style="color: #047857; font-size: 1.2rem;">0 Bs</strong>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
+    <!-- MENU INFERIOR -->
     <nav class="nav-bottom">
         <button id="nav-btn-resumen" class="nav-item active" onclick="cambiarSeccion(this, 'sec-resumen')">📊<br>Resumen</button>
         <button class="nav-item" onclick="cambiarSeccion(this, 'sec-produccion')">🥚<br>Producción</button>
         <button class="nav-item" onclick="cambiarSeccion(this, 'sec-ventas')">💰<br>Ventas</button>
         <button class="nav-item" onclick="cambiarSeccion(this, 'sec-costos')">📋<br>Costos</button>
+        <button class="nav-item" onclick="cambiarSeccion(this, 'sec-finanzas')">📈<br>Finanzas</button>
     </nav>
 
+    <!-- MODAL AJUSTES -->
     <div id="modal-ajustes" class="modal">
         <div class="modal-content">
             <h3>⚙️ Configuración de Galpones</h3>
@@ -213,6 +258,7 @@
         let usuarioActual = 'Mamá';
         let registros = [];
         let ventasRegistradas = [];
+        let costosRegistrados = [];
         let galpones = { grandes: 35, medio: 35, derecha: 30 };
 
         document.getElementById('input-fecha').value = new Date().toISOString().split('T')[0];
@@ -236,6 +282,9 @@
             if (seccionDeseada) {
                 seccionDeseada.style.display = 'block';
                 seccionDeseada.classList.add('active');
+            }
+            if(idSeccion === 'sec-finanzas') {
+                actualizarFinanzas();
             }
         }
 
@@ -351,12 +400,6 @@
                 `).join('');
         }
 
-        function sugerirPrecio() {
-            const select = document.getElementById('venta-tamano');
-            document.getElementById('venta-precio').value = select.value;
-            calcularTotalVenta();
-        }
-
         function calcularTotalVenta() {
             const precio = parseFloat(document.getElementById('venta-precio').value) || 0;
             const cantidad = parseFloat(document.getElementById('venta-cantidad').value) || 0;
@@ -365,10 +408,10 @@
 
         function guardarVenta() {
             const cliente = document.getElementById('venta-cliente').value.trim();
-            const select = document.getElementById('venta-tamano');
-            const nombreTamano = select.options[select.selectedIndex].text.split(' (')[0];
+            const tamano = document.getElementById('venta-tamano').value.trim() || 'General';
             const precio = parseFloat(document.getElementById('venta-precio').value) || 0;
             const cantidad = parseFloat(document.getElementById('venta-cantidad').value) || 0;
+            const condicion = document.getElementById('venta-condicion').value;
 
             if(!cliente || !cantidad || cantidad <= 0 || !precio) {
                 alert('Por favor ingrese el cliente, una cantidad y precio válidos.');
@@ -376,33 +419,62 @@
             }
 
             const total = precio * cantidad;
-            ventasRegistradas.push({ cliente, tamano: nombreTamano, precio, cantidad, total, usuario: usuarioActual, hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) });
+            ventasRegistradas.push({ cliente, tamano, precio, cantidad, total, condicion, usuario: usuarioActual, hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) });
 
             document.getElementById('lista-ventas').innerHTML = ventasRegistradas.map(v => `
                 <div class="historial-item">
-                    <span><strong>👤 ${v.cliente}</strong>: ${v.cantidad}x ${v.tamano} (${v.precio} Bs) = <strong>${v.total} Bs</strong></span>
+                    <span><strong>👤 ${v.cliente}</strong> (${v.condicion}): ${v.cantidad}x ${v.tamano} (${v.precio} Bs) = <strong>${v.total} Bs</strong></span>
                     <span style="color: var(--text-light);">${v.hora}</span>
                 </div>
             `).join('');
 
-            alert(`¡Venta registrada para [${cliente}]! (${total} Bs)`);
+            alert(`¡Venta registrada para [${cliente}]! (${total} Bs - ${condicion})`);
             document.getElementById('venta-cliente').value = '';
+            document.getElementById('venta-tamano').value = '';
+            document.getElementById('venta-precio').value = '';
             document.getElementById('venta-cantidad').value = '';
             document.getElementById('venta-total-calc').innerText = '0 Bs';
             document.getElementById('nav-btn-resumen').click();
         }
 
         function guardarCosto() {
-            const desc = document.getElementById('costo-desc').value;
-            const monto = document.getElementById('costo-monto').value;
+            const desc = document.getElementById('costo-desc').value.trim();
+            const monto = parseFloat(document.getElementById('costo-monto').value) || 0;
             if(!desc || !monto) {
-                alert('Por favor complete los campos');
+                alert('Por favor complete los campos del costo');
                 return;
             }
+
+            costosRegistrados.push({ desc, monto, usuario: usuarioActual, hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) });
+
+            document.getElementById('lista-costos').innerHTML = costosRegistrados.map(c => `
+                <div class="historial-item">
+                    <span><strong>📋 ${c.desc}</strong>: <strong>${c.monto} Bs</strong></span>
+                    <span style="color: var(--text-light);">${c.hora}</span>
+                </div>
+            `).join('');
+
             alert(`¡Costo registrado con éxito por [${usuarioActual}]! (${monto} Bs)`);
             document.getElementById('costo-desc').value = '';
             document.getElementById('costo-monto').value = '';
             document.getElementById('nav-btn-resumen').click();
+        }
+
+        function actualizarFinanzas() {
+            let totalIngresos = 0;
+            ventasRegistradas.forEach(v => { totalIngresos += v.total; });
+
+            let totalCostos = 0;
+            costosRegistrados.forEach(c => { totalCostos += c.monto; });
+
+            let utilidad = totalIngresos - totalCostos;
+
+            document.getElementById('fin-ingresos').innerText = totalIngresos + ' Bs';
+            document.getElementById('fin-costos').innerText = totalCostos + ' Bs';
+            
+            const utilidadEl = document.getElementById('fin-utilidad');
+            utilidadEl.innerText = utilidad + ' Bs';
+            utilidadEl.style.color = utilidad >= 0 ? '#047857' : '#dc2626';
         }
     </script>
 </body>
