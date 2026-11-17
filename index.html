@@ -32,6 +32,15 @@
         button, .btn { background: var(--primary); color: white; border: none; padding: 12px 20px; border-radius: 10px; font-weight: bold; cursor: pointer; width: 100%; font-size: 1rem; transition: background 0.2s; }
         button:active { background: var(--primary-dark); }
         input, select { width: 100%; padding: 10px 12px; margin-top: 6px; box-sizing: border-box; border: 1px solid var(--border); border-radius: 8px; font-size: 1rem; background: #fff; }
+        
+        /* Controles con botones numéricos */
+        .input-con-flechas { display: flex; align-items: center; margin-top: 6px; }
+        .input-con-flechas input { margin-top: 0; text-align: center; border-radius: 0; border-left: none; border-right: none; }
+        .btn-stepper { background: #f3f4f6; color: var(--text); border: 1px solid var(--border); padding: 10px 14px; font-weight: bold; cursor: pointer; font-size: 1.1rem; width: auto; }
+        .btn-stepper:active { background: #e5e7eb; }
+        .btn-stepper-left { border-radius: 8px 0 0 8px; border-right: none; }
+        .btn-stepper-right { border-radius: 0 8px 8px 0; border-left: none; }
+
         .bloque-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 15px; }
         .bloque-card { background: #fffbeb; border: 1px solid #fde68a; padding: 10px; border-radius: 10px; text-align: center; }
         .bloque-card h4 { margin: 0 0 5px 0; color: #92400e; font-size: 0.9rem; }
@@ -122,15 +131,27 @@
                 <div class="bloque-grid">
                     <div class="bloque-card">
                         <h4>Grandes</h4>
-                        <input type="number" id="input-grandes" placeholder="Cant." style="text-align: center;">
+                        <div class="input-con-flechas">
+                            <button class="btn-stepper btn-stepper-left" onclick="ajustarValor('input-grandes', -1)">-</button>
+                            <input type="number" id="input-grandes" value="0" style="text-align: center;">
+                            <button class="btn-stepper btn-stepper-right" onclick="ajustarValor('input-grandes', 1)">+</button>
+                        </div>
                     </div>
                     <div class="bloque-card">
                         <h4>Medio</h4>
-                        <input type="number" id="input-medio" placeholder="Cant." style="text-align: center;">
+                        <div class="input-con-flechas">
+                            <button class="btn-stepper btn-stepper-left" onclick="ajustarValor('input-medio', -1)">-</button>
+                            <input type="number" id="input-medio" value="0" style="text-align: center;">
+                            <button class="btn-stepper btn-stepper-right" onclick="ajustarValor('input-medio', 1)">+</button>
+                        </div>
                     </div>
                     <div class="bloque-card">
                         <h4>Derecha</h4>
-                        <input type="number" id="input-derecha" placeholder="Cant." style="text-align: center;">
+                        <div class="input-con-flechas">
+                            <button class="btn-stepper btn-stepper-left" onclick="ajustarValor('input-derecha', -1)">-</button>
+                            <input type="number" id="input-derecha" value="0" style="text-align: center;">
+                            <button class="btn-stepper btn-stepper-right" onclick="ajustarValor('input-derecha', 1)">+</button>
+                        </div>
                     </div>
                 </div>
 
@@ -141,13 +162,22 @@
         <!-- SECCION VENTAS -->
         <div id="sec-ventas" class="seccion" style="display: none;">
             <div class="card">
-                <h3>💰 Registro de Ventas</h3>
+                <h3 id="titulo-venta-form">💰 Registro de Ventas</h3>
+
+                <input type="hidden" id="edit-venta-id" value="">
 
                 <label style="margin-top: 5px; display: block; font-size: 0.9rem;">Nombre del Cliente:</label>
                 <input type="text" id="venta-cliente" placeholder="Ej. Juan Pérez" style="margin-bottom: 10px;">
                 
-                <label style="display: block; font-size: 0.9rem;">Categoría / Descripción:</label>
-                <input type="text" id="venta-tamano" placeholder="Ej. Cartón Extra, 30 unidades, etc." style="margin-bottom: 10px;">
+                <label style="display: block; font-size: 0.9rem;">Categoría / Tamaño:</label>
+                <select id="venta-tamano" style="margin-bottom: 10px;">
+                    <option value="Cartón Extras">🥚 Cartón Extras</option>
+                    <option value="Cartón Jumbos">🥚 Cartón Jumbos</option>
+                    <option value="Cartón Primera">🥚 Cartón Primera</option>
+                    <option value="Cartón Segunda">🥚 Cartón Segunda</option>
+                    <option value="Cartón Tercera">🥚 Cartón Tercera</option>
+                    <option value="Blister / Medida libre">📦 Blister / Otra medida</option>
+                </select>
 
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                     <div>
@@ -156,7 +186,11 @@
                     </div>
                     <div>
                         <label style="display: block; font-size: 0.9rem;">Cantidad:</label>
-                        <input type="number" id="venta-cantidad" placeholder="0" oninput="calcularTotalVenta()" style="text-align: center;">
+                        <div class="input-con-flechas">
+                            <button class="btn-stepper btn-stepper-left" onclick="ajustarValor('venta-cantidad', -1); calcularTotalVenta();">-</button>
+                            <input type="number" id="venta-cantidad" value="1" oninput="calcularTotalVenta()" style="text-align: center;">
+                            <button class="btn-stepper btn-stepper-right" onclick="ajustarValor('venta-cantidad', 1); calcularTotalVenta();">+</button>
+                        </div>
                     </div>
                 </div>
 
@@ -168,7 +202,7 @@
 
                 <p style="margin-top: 5px; font-size: 1rem;">Total a cobrar: <strong id="venta-total-calc" style="color: var(--primary); font-size: 1.2rem;">0 Bs</strong></p>
 
-                <button onclick="guardarVenta()" style="margin-top: 10px;">💾 Registrar Venta</button>
+                <button id="btn-guardar-venta" onclick="guardarVenta()" style="margin-top: 10px;">💾 Registrar Venta</button>
             </div>
 
             <div class="card">
@@ -288,6 +322,17 @@
             }
         }
 
+        function ajustarValor(idInput, cambio) {
+            const input = document.getElementById(idInput);
+            let val = parseInt(input.value) || 0;
+            val += cambio;
+            if (val < 0) val = 0;
+            input.value = val;
+            if(idInput.includes('input-')) {
+                calcularEnTiempoReal();
+            }
+        }
+
         function abrirAjustes() { document.getElementById('modal-ajustes').style.display = 'flex'; }
         function cerrarAjustes() { document.getElementById('modal-ajustes').style.display = 'none'; }
 
@@ -342,9 +387,9 @@
             }
 
             actualizarPantallaResumen();
-            document.getElementById('input-grandes').value = '';
-            document.getElementById('input-medio').value = '';
-            document.getElementById('input-derecha').value = '';
+            document.getElementById('input-grandes').value = 0;
+            document.getElementById('input-medio').value = 0;
+            document.getElementById('input-derecha').value = 0;
             document.getElementById('nav-btn-resumen').click();
         }
 
@@ -407,8 +452,9 @@
         }
 
         function guardarVenta() {
+            const editId = document.getElementById('edit-venta-id').value;
             const cliente = document.getElementById('venta-cliente').value.trim();
-            const tamano = document.getElementById('venta-tamano').value.trim() || 'General';
+            const tamano = document.getElementById('venta-tamano').value;
             const precio = parseFloat(document.getElementById('venta-precio').value) || 0;
             const cantidad = parseFloat(document.getElementById('venta-cantidad').value) || 0;
             const condicion = document.getElementById('venta-condicion').value;
@@ -419,22 +465,57 @@
             }
 
             const total = precio * cantidad;
-            ventasRegistradas.push({ cliente, tamano, precio, cantidad, total, condicion, usuario: usuarioActual, hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) });
 
-            document.getElementById('lista-ventas').innerHTML = ventasRegistradas.map(v => `
-                <div class="historial-item">
-                    <span><strong>👤 ${v.cliente}</strong> (${v.condicion}): ${v.cantidad}x ${v.tamano} (${v.precio} Bs) = <strong>${v.total} Bs</strong></span>
-                    <span style="color: var(--text-light);">${v.hora}</span>
-                </div>
-            `).join('');
+            if(editId !== "") {
+                // Editando venta existente
+                ventasRegistradas[editId] = { cliente, tamano, precio, cantidad, total, condicion, usuario: usuarioActual, hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) };
+                document.getElementById('edit-venta-id').value = "";
+                document.getElementById('titulo-venta-form').innerText = "💰 Registro de Ventas";
+                document.getElementById('btn-guardar-venta').innerText = "💾 Registrar Venta";
+                alert(`¡Venta de [${cliente}] actualizada con éxito!`);
+            } else {
+                // Nueva venta
+                ventasRegistradas.push({ cliente, tamano, precio, cantidad, total, condicion, usuario: usuarioActual, hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) });
+                alert(`¡Venta registrada para [${cliente}]! (${total} Bs - ${condicion})`);
+            }
 
-            alert(`¡Venta registrada para [${cliente}]! (${total} Bs - ${condicion})`);
+            actualizarListaVentas();
+
             document.getElementById('venta-cliente').value = '';
-            document.getElementById('venta-tamano').value = '';
             document.getElementById('venta-precio').value = '';
-            document.getElementById('venta-cantidad').value = '';
+            document.getElementById('venta-cantidad').value = 1;
             document.getElementById('venta-total-calc').innerText = '0 Bs';
             document.getElementById('nav-btn-resumen').click();
+        }
+
+        function actualizarListaVentas() {
+            document.getElementById('lista-ventas').innerHTML = ventasRegistradas.length === 0
+                ? '<p style="color: var(--text-light); font-size: 0.9rem; text-align: center; margin: 10px 0;">No hay ventas registradas.</p>'
+                : ventasRegistradas.map((v, index) => `
+                    <div class="historial-item">
+                        <span><strong>👤 ${v.cliente}</strong> (${v.condicion}): ${v.cantidad}x ${v.tamano} (${v.precio} Bs) = <strong>${v.total} Bs</strong></span>
+                        <button onclick="editarVenta(${index})" style="width: auto; padding: 4px 8px; font-size: 0.75rem; background: #3b82f6;">✏️</button>
+                    </div>
+                `).join('');
+        }
+
+        function editarVenta(index) {
+            let v = ventasRegistradas[index];
+            if(v) {
+                document.getElementById('edit-venta-id').value = index;
+                document.getElementById('venta-cliente').value = v.cliente;
+                document.getElementById('venta-tamano').value = v.tamano;
+                document.getElementById('venta-precio').value = v.precio;
+                document.getElementById('venta-cantidad').value = v.cantidad;
+                document.getElementById('venta-condicion').value = v.condicion;
+                calcularTotalVenta();
+
+                document.getElementById('titulo-venta-form').innerText = "✏️ Editando Venta";
+                document.getElementById('btn-guardar-venta').innerText = "💾 Actualizar Venta";
+
+                // Ir a la pestaña de ventas
+                document.querySelectorAll('.nav-item')[2].click();
+            }
         }
 
         function guardarCosto() {
