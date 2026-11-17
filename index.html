@@ -22,8 +22,7 @@
         
         iframe#netlify-badge, div[id*="netlify"], a[href*="netlify.com/experimental"] { display: none !important; }
 
-        .header-botones { display: flex; gap: 5px; }
-        .btn-top { background: rgba(255,255,255,0.25); color: white; border: none; padding: 6px 10px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 0.75rem; display: flex; align-items: center; gap: 3px; }
+        .btn-ajustes-top { background: rgba(255,255,255,0.25); color: white; border: none; padding: 8px 12px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 0.85rem; display: flex; align-items: center; gap: 5px; }
         .container { padding: 15px; max-width: 600px; margin: auto; }
         .users { display: flex; gap: 8px; justify-content: center; margin-bottom: 15px; margin-top: 10px; }
         .user-btn { background: white; border: 2px solid var(--primary); color: var(--primary); padding: 8px 14px; border-radius: 20px; cursor: pointer; font-weight: bold; font-size: 0.9rem; transition: all 0.2s; }
@@ -32,7 +31,7 @@
         .card h3 { margin-top: 0; font-size: 1.1rem; color: var(--primary-dark); display: flex; align-items: center; gap: 8px; }
         button, .btn { background: var(--primary); color: white; border: none; padding: 12px 20px; border-radius: 10px; font-weight: bold; cursor: pointer; width: 100%; font-size: 1rem; transition: background 0.2s; }
         button:active { background: var(--primary-dark); }
-        input, select { width: 100%; padding: 10px 12px; margin-top: 6px; box-sizing: border-box; border: 1px solid var(--border); border-radius: 8px; font-size: 1rem; background: #fff; }
+        input, select, textarea { width: 100%; padding: 10px 12px; margin-top: 6px; box-sizing: border-box; border: 1px solid var(--border); border-radius: 8px; font-size: 1rem; background: #fff; }
         
         .input-con-flechas { display: flex; align-items: center; margin-top: 6px; }
         .input-con-flechas input { margin-top: 0; text-align: center; border-radius: 0; border-left: none; border-right: none; }
@@ -62,7 +61,7 @@
         .nav-item { text-align: center; color: var(--text-light); text-decoration: none; font-size: 0.70rem; font-weight: 600; background: none; border: none; cursor: pointer; padding: 4px; flex: 1; }
         .nav-item.active { color: var(--primary); }
         .modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 10000; justify-content: center; align-items: center; padding: 20px; }
-        .modal-content { background: white; padding: 20px; border-radius: 14px; width: 100%; max-width: 400px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); }
+        .modal-content { background: white; padding: 20px; border-radius: 14px; width: 100%; max-width: 420px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); max-height: 90vh; overflow-y: auto; }
         .seccion { display: none; }
         .seccion.active { display: block; }
         .historial-item { font-size: 0.85rem; padding: 8px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
@@ -76,13 +75,9 @@
     <header>
         <div class="header-title" style="text-align: left;">
             <h1 style="font-size: 1.1rem;">🐔 Granja ISA</h1>
-            <span class="badge-envivo">● En línea</span>
+            <span class="badge-envivo">● Guardado Local Activo</span>
         </div>
-        <div class="header-botones">
-            <button class="btn-top" onclick="guardarEnNube()" style="background: #10b981;">☁️ Guardar</button>
-            <button class="btn-top" onclick="cargarDeNube()" style="background: #3b82f6;">🔄 Sincronizar</button>
-            <button class="btn-top" onclick="abrirAjustes()">⚙️</button>
-        </div>
+        <button class="btn-ajustes-top" onclick="abrirAjustes()">⚙️ Ajustes y Datos</button>
     </header>
 
     <div class="container">
@@ -344,22 +339,32 @@
     <!-- MODAL AJUSTES -->
     <div id="modal-ajustes" class="modal">
         <div class="modal-content">
-            <h3>⚙️ Configuración de Galpones</h3>
-            <label>Código de Sala / Nube:</label>
-            <input type="text" id="input-sala" value="granja-isa-scz-2026">
+            <h3>⚙️ Configuración y Sincronización</h3>
             
-            <label style="margin-top: 10px; display: block;">Gallinas Iniciales "Grandes":</label>
+            <label style="margin-top: 5px; display: block; font-size: 0.9rem;">Gallinas Iniciales "Grandes":</label>
             <input type="number" id="gallinas-grandes" value="35">
             
-            <label style="margin-top: 10px; display: block;">Gallinas Iniciales "Medio":</label>
+            <label style="margin-top: 10px; display: block; font-size: 0.9rem;">Gallinas Iniciales "Medio":</label>
             <input type="number" id="gallinas-medio" value="35">
             
-            <label style="margin-top: 10px; display: block;">Gallinas Iniciales "Derecha":</label>
+            <label style="margin-top: 10px; display: block; font-size: 0.9rem;">Gallinas Iniciales "Derecha":</label>
             <input type="number" id="gallinas-derecha" value="30">
 
+            <hr style="border: none; border-top: 1px solid var(--border); margin: 15px 0;">
+
+            <h4 style="margin: 0 0 5px 0; font-size: 0.95rem; color: var(--primary-dark);">🔄 Sincronizar con el Celular / PC</h4>
+            <p style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 8px;">Copia este código de respaldo en la computadora y pégalo en el celular para pasar los datos al instante:</p>
+            
+            <textarea id="codigo-respaldo" rows="3" placeholder="Aquí aparecerán tus datos..." style="font-size: 0.75rem; font-family: monospace;"></textarea>
+
+            <div style="display: flex; gap: 8px; margin-top: 8px;">
+                <button onclick="copiarCodigo()" style="background: #3b82f6; font-size: 0.85rem; padding: 8px;">📋 Copiar</button>
+                <button onclick="pegarCodigo()" style="background: #10b981; font-size: 0.85rem; padding: 8px;">📥 Cargar</button>
+            </div>
+
             <div style="display: flex; gap: 10px; margin-top: 20px;">
-                <button onclick="cerrarAjustes()" style="background: #6b7280;">Cancelar</button>
-                <button onclick="guardarAjustes()">Guardar</button>
+                <button onclick="cerrarAjustes()" style="background: #6b7280;">Cerrar</button>
+                <button onclick="guardarAjustes()">Guardar Galpones</button>
             </div>
         </div>
     </div>
@@ -373,7 +378,7 @@
 
         document.getElementById('input-fecha').value = new Date().toISOString().split('T')[0];
 
-        // Sincronización automática local al iniciar
+        // Cargar datos locales al iniciar
         window.onload = function() {
             let guardadoLocal = localStorage.getItem('granja_isa_data');
             if(guardadoLocal) {
@@ -382,7 +387,12 @@
                     registros = datos.registros || [];
                     ventasRegistradas = datos.ventas || [];
                     costosRegistrados = datos.costos || [];
-                    if(datos.galpones) galponesBase = datos.galpones;
+                    if(datos.galpones) {
+                        galponesBase = datos.galpones;
+                        document.getElementById('gallinas-grandes').value = galponesBase.grandes;
+                        document.getElementById('gallinas-medio').value = galponesBase.medio;
+                        document.getElementById('gallinas-derecha').value = galponesBase.derecha;
+                    }
                     actualizarPantallaResumen();
                     actualizarListaVentas();
                     actualizarListaCostos();
@@ -390,55 +400,51 @@
             }
         };
 
-        // --- SISTEMA DE NUBE (JSONbin.io gratuito) ---
-        const BIN_MASTER_URL = "https://api.jsonbin.io/v3/b";
-        const API_KEY = "$2a$10$7h... (sistema publico de respaldo)"; // Llave abierta de almacenamiento libre
-
-        async function guardarEnNube() {
-            let sala = document.getElementById('input-sala').value.trim() || 'granja-isa-scz-2026';
+        function guardarLocalmente() {
             let paquete = {
                 galpones: galponesBase,
                 registros: registros,
                 ventas: ventasRegistradas,
                 costos: costosRegistrados
             };
-            
-            // Guardar localmente también
             localStorage.setItem('granja_isa_data', JSON.stringify(paquete));
-
-            try {
-                let res = await fetch(`https://api.jsonbin.io/v3/b`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-Master-Key': '$2a$10$w8WzK7q2q6Qx8Z7q2q6QxO3x3x3x3x3x3x3x3x3x3x3x3x3x3x3x3'
-                    },
-                    body: JSON.stringify(paquete)
-                });
-                alert('¡Datos guardados y respaldados con éxito en la nube de la sala [' + sala + ']!');
-            } catch(e) {
-                // Respaldo alternativo infalible usando localStorage compartido en navegador
-                alert('¡Datos guardados localmente! Para pasar al celu con total seguridad, usa el portapapeles o sincroniza con la red.');
-            }
         }
 
-        async function cargarDeNube() {
-            let sala = document.getElementById('input-sala').value.trim() || 'granja-isa-scz-2026';
-            // Cargar de almacenamiento local compartido o nube
+        function copiarCodigo() {
+            guardarLocalmente();
             let guardadoLocal = localStorage.getItem('granja_isa_data');
-            if(guardadoLocal) {
-                let datos = JSON.parse(guardadoLocal);
+            let txtArea = document.getElementById('codigo-respaldo');
+            txtArea.value = guardadoLocal;
+            txtArea.select();
+            navigator.clipboard.writeText(guardadoLocal);
+            alert('¡Código de datos copiado al portapapeles! Envíatelo por WhatsApp o ábrelo en el celular para pegarlo.');
+        }
+
+        function pegarCodigo() {
+            let txtArea = document.getElementById('codigo-respaldo').value.trim();
+            if(!txtArea) {
+                alert('Por favor pega el código de respaldo en el recuadro.');
+                return;
+            }
+            try {
+                let datos = JSON.parse(txtArea);
                 registros = datos.registros || [];
                 ventasRegistradas = datos.ventas || [];
                 costosRegistrados = datos.costos || [];
-                if(datos.galpones) galponesBase = datos.galpones;
-                
+                if(datos.galpones) {
+                    galponesBase = datos.galpones;
+                    document.getElementById('gallinas-grandes').value = galponesBase.grandes;
+                    document.getElementById('gallinas-medio').value = galponesBase.medio;
+                    document.getElementById('gallinas-derecha').value = galponesBase.derecha;
+                }
+                guardarLocalmente();
                 actualizarPantallaResumen();
                 actualizarListaVentas();
                 actualizarListaCostos();
-                alert('¡Datos sincronizados correctamente desde la sala [' + sala + ']!');
-            } else {
-                alert('No hay registros guardados todavía en este dispositivo.');
+                alert('¡Datos cargados y sincronizados con éxito!');
+                cerrarAjustes();
+            } catch(e) {
+                alert('El código no es válido. Revisa haberlo copiado completo.');
             }
         }
 
@@ -478,13 +484,20 @@
             }
         }
 
-        function abrirAjustes() { document.getElementById('modal-ajustes').style.display = 'flex'; }
+        function abrirAjustes() { 
+            // Cargar datos actuales en el textarea al abrir ajustes
+            let guardadoLocal = localStorage.getItem('granja_isa_data');
+            if(guardadoLocal) document.getElementById('codigo-respaldo').value = guardadoLocal;
+            document.getElementById('modal-ajustes').style.display = 'flex'; 
+        }
+
         function cerrarAjustes() { document.getElementById('modal-ajustes').style.display = 'none'; }
 
         function guardarAjustes() {
             galponesBase.grandes = parseInt(document.getElementById('gallinas-grandes').value) || 1;
             galponesBase.medio = parseInt(document.getElementById('gallinas-medio').value) || 1;
             galponesBase.derecha = parseInt(document.getElementById('gallinas-derecha').value) || 1;
+            guardarLocalmente();
             alert('¡Configuración guardada correctamente!');
             cerrarAjustes();
             actualizarPantallaResumen();
@@ -550,8 +563,8 @@
                 alert(`¡Registro para el ${fecha} guardado con éxito!`);
             }
 
+            guardarLocalmente();
             actualizarPantallaResumen();
-            guardarEnNube(); // Autoguardado en nube
 
             document.getElementById('input-grandes').value = 0;
             document.getElementById('input-medio').value = 0;
@@ -668,8 +681,8 @@
                 alert(`¡Venta registrada para [${cliente}]! (${total} Bs - ${condicion})`);
             }
 
+            guardarLocalmente();
             actualizarListaVentas();
-            guardarEnNube();
 
             document.getElementById('venta-cliente').value = '';
             document.getElementById('venta-precio').value = '';
@@ -717,8 +730,8 @@
 
             costosRegistrados.push({ desc, monto, usuario: usuarioActual, hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) });
 
+            guardarLocalmente();
             actualizarListaCostos();
-            guardarEnNube();
 
             alert(`¡Costo registrado con éxito por [${usuarioActual}]! (${monto} Bs)`);
             document.getElementById('costo-desc').value = '';
