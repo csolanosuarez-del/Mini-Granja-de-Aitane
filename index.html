@@ -3,787 +3,450 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Granja ISA Brown</title>
+    <title>Granja ISA - Control Operativo</title>
+    <!-- Tailwind CSS para diseño moderno -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js para gráficos -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
     <style>
-        :root {
-            --primary: #d97706;
-            --primary-dark: #b45309;
-            --bg: #fdfbf7;
-            --card-bg: #ffffff;
-            --text: #1f2937;
-            --text-light: #6b7280;
-            --border: #e5e7eb;
-        }
-        body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); margin: 0; padding: 0; color: var(--text); padding-bottom: 70px; }
-        header { background: linear-gradient(135deg, #f59e0b, #d97706); color: white; padding: 12px 15px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        .header-title { text-align: center; flex-grow: 1; }
-        header h1 { margin: 0; font-size: 1.1rem; }
-        .badge-envivo { background: #10b981; color: white; padding: 2px 8px; font-size: 0.70rem; border-radius: 12px; display: inline-block; margin-top: 2px; font-weight: 600; }
-        
-        iframe#netlify-badge, div[id*="netlify"], a[href*="netlify.com/experimental"] { display: none !important; }
-
-        .btn-ajustes-top { background: rgba(255,255,255,0.25); color: white; border: none; padding: 8px 12px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 0.85rem; display: flex; align-items: center; gap: 5px; }
-        .container { padding: 15px; max-width: 600px; margin: auto; }
-        .users { display: flex; gap: 8px; justify-content: center; margin-bottom: 15px; margin-top: 10px; }
-        .user-btn { background: white; border: 2px solid var(--primary); color: var(--primary); padding: 8px 14px; border-radius: 20px; cursor: pointer; font-weight: bold; font-size: 0.9rem; transition: all 0.2s; }
-        .user-btn.active { background: var(--primary); color: white; box-shadow: 0 2px 5px rgba(217,119,6,0.3); }
-        .card { background: var(--card-bg); padding: 16px; border-radius: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); border: 1px solid var(--border); margin-bottom: 15px; }
-        .card h3 { margin-top: 0; font-size: 1.1rem; color: var(--primary-dark); display: flex; align-items: center; gap: 8px; }
-        button, .btn { background: var(--primary); color: white; border: none; padding: 12px 20px; border-radius: 10px; font-weight: bold; cursor: pointer; width: 100%; font-size: 1rem; transition: background 0.2s; }
-        button:active { background: var(--primary-dark); }
-        input, select, textarea { width: 100%; padding: 10px 12px; margin-top: 6px; box-sizing: border-box; border: 1px solid var(--border); border-radius: 8px; font-size: 1rem; background: #fff; }
-        
-        .input-con-flechas { display: flex; align-items: center; margin-top: 6px; }
-        .input-con-flechas input { margin-top: 0; text-align: center; border-radius: 0; border-left: none; border-right: none; }
-        .btn-stepper { background: #f3f4f6; color: var(--text); border: 1px solid var(--border); padding: 10px 14px; font-weight: bold; cursor: pointer; font-size: 1.1rem; width: auto; }
-        .btn-stepper:active { background: #e5e7eb; }
-        .btn-stepper-left { border-radius: 8px 0 0 8px; border-right: none; }
-        .btn-stepper-right { border-radius: 0 8px 8px 0; border-left: none; }
-
-        .bloque-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 15px; }
-        .bloque-card { background: #fffbeb; border: 1px solid #fde68a; padding: 10px; border-radius: 10px; text-align: center; }
-        .bloque-card h4 { margin: 0 0 5px 0; color: #92400e; font-size: 0.9rem; }
-        .bloque-card-bajas { background: #fef2f2; border: 1px solid #fecaca; }
-        .bloque-card-bajas h4 { color: #991b1b; }
-
-        .grafica-container { display: flex; align-items: flex-end; justify-content: space-around; height: 140px; border-bottom: 2px solid var(--border); padding-bottom: 5px; margin-top: 15px; gap: 15px; }
-        .barra-wrapper { display: flex; flex-direction: column; align-items: center; flex: 1; height: 100%; justify-content: flex-end; }
-        .barra { width: 100%; max-width: 50px; background: var(--primary); border-radius: 6px 6px 0 0; display: flex; justify-content: center; align-items: flex-start; padding-top: 4px; color: white; font-size: 0.75rem; font-weight: bold; height: 5px; transition: height 0.3s; }
-        .barra-label { margin-top: 6px; font-size: 0.8rem; font-weight: bold; color: var(--text-light); }
-
-        .finanzas-grafica-creativa { display: flex; flex-direction: column; gap: 12px; margin-top: 15px; }
-        .fin-barra-item { display: flex; flex-direction: column; gap: 4px; }
-        .fin-barra-info { display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: bold; }
-        .fin-barra-pista { background: #f1f5f9; border-radius: 8px; height: 22px; width: 100%; overflow: hidden; border: 1px solid var(--border); display: flex; }
-        .fin-barra-progreso { height: 100%; border-radius: 6px 0 0 6px; display: flex; align-items: center; padding-left: 8px; color: white; font-size: 0.75rem; font-weight: bold; transition: width 0.4s ease; }
-
-        .nav-bottom { position: fixed; bottom: 0; left: 0; right: 0; background: white; display: flex; justify-content: space-around; border-top: 1px solid var(--border); padding: 8px 0; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); z-index: 9999; }
-        .nav-item { text-align: center; color: var(--text-light); text-decoration: none; font-size: 0.70rem; font-weight: 600; background: none; border: none; cursor: pointer; padding: 4px; flex: 1; }
-        .nav-item.active { color: var(--primary); }
-        .modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 10000; justify-content: center; align-items: center; padding: 20px; }
-        .modal-content { background: white; padding: 20px; border-radius: 14px; width: 100%; max-width: 420px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); max-height: 90vh; overflow-y: auto; }
-        .seccion { display: none; }
-        .seccion.active { display: block; }
-        .historial-item { font-size: 0.85rem; padding: 8px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
-        
-        .finanzas-grid { display: grid; grid-template-columns: 1fr; gap: 10px; margin-top: 10px; }
-        .finanza-box { background: #f8fafc; border: 1px solid var(--border); padding: 12px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; }
-        .finanza-box.utilidad { background: #ecfdf5; border-color: #a7f3d0; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
     </style>
 </head>
-<body>
-    <header>
-        <div class="header-title" style="text-align: left;">
-            <h1 style="font-size: 1.1rem;">🐔 Granja ISA</h1>
-            <span class="badge-envivo">● Guardado Local Activo</span>
+<body class="bg-amber-50 text-slate-800 min-h-screen pb-20">
+
+    <!-- Header Principal -->
+    <header class="bg-amber-700 text-white shadow-md p-4 sticky top-0 z-50 flex justify-between items-center">
+        <div class="flex items-center space-x-2">
+            <span class="text-2xl">🐔</span>
+            <h1 class="text-xl font-bold">Granja ISA</h1>
         </div>
-        <button class="btn-ajustes-top" onclick="abrirAjustes()">⚙️ Ajustes y Datos</button>
+        <div class="flex items-center space-x-3">
+            <span id="sync-status" class="text-xs bg-amber-600 px-2 py-1 rounded-full font-semibold">🔄 Conectando...</span>
+            <button onclick="abrirConfig()" class="bg-amber-800 hover:bg-amber-900 px-3 py-1.5 rounded-lg text-sm font-medium transition flex items-center gap-1 shadow">
+                ⚙️ Ajustes
+            </button>
+        </div>
     </header>
 
-    <div class="container">
-        <div class="users">
-            <button class="user-btn active" onclick="selectUser(this, 'Mamá')">👩‍🌾 Mamá</button>
-            <button class="user-btn" onclick="selectUser(this, 'Yo')">🧑‍💻 Yo</button>
-            <button class="user-btn" onclick="selectUser(this, 'Jeanine')">👩‍💼 Jeanine</button>
+    <!-- Selector de Usuario / Galpón -->
+    <div class="max-w-4xl mx-auto p-4">
+        <div class="bg-white rounded-xl shadow-sm p-3 mb-4 flex justify-around border border-amber-100">
+            <button onclick="cambiarUsuario('Mamá')" id="btn-Mama" class="px-4 py-2 rounded-lg font-semibold text-sm transition bg-amber-600 text-white shadow">Mamá</button>
+            <button onclick="cambiarUsuario('Yo')" id="btn-Yo" class="px-4 py-2 rounded-lg font-semibold text-sm transition bg-slate-100 text-slate-600">Yo</button>
+            <button onclick="cambiarUsuario('Jeanine')" id="btn-Jeanine" class="px-4 py-2 rounded-lg font-semibold text-sm transition bg-slate-100 text-slate-600">Jeanine</button>
         </div>
 
-        <!-- SECCION RESUMEN -->
-        <div id="sec-resumen" class="seccion active" style="display: block;">
-            <div class="card">
-                <h3>📊 Resumen del Día por Galpón</h3>
-                <p style="margin-bottom: 4px;">Total huevos recolectados: <strong id="huevos-total" style="font-size: 1.1rem; color: var(--primary);">0</strong></p>
-                <p style="margin-bottom: 8px; font-size: 0.85rem; color: #dc2626;">Total bajas / muertes registradas: <strong id="bajas-total">0</strong></p>
-                <hr style="border: none; border-top: 1px solid var(--border); margin: 10px 0;">
-                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; text-align: center; font-size: 0.85rem;">
-                    <div><strong>Grandes:</strong><br><span id="postura-grandes" style="color: var(--primary);">0%</span><br><small id="cant-grandes" style="color:#6b7280;">(0h)</small><br><small style="color:#dc2626;" id="activas-grandes">(35 gallinas)</small></div>
-                    <div><strong>Medio:</strong><br><span id="postura-medio" style="color: var(--primary);">0%</span><br><small id="cant-medio" style="color:#6b7280;">(0h)</small><br><small style="color:#dc2626;" id="activas-medio">(35 gallinas)</small></div>
-                    <div><strong>Derecha:</strong><br><span id="postura-derecha" style="color: var(--primary);">0%</span><br><small id="cant-derecha" style="color:#6b7280;">(0h)</small><br><small style="color:#dc2626;" id="activas-derecha">(30 gallinas)</small></div>
+        <!-- CONTENIDO DE LAS PESTAÑAS -->
+        
+        <!-- 1. RESUMEN -->
+        <div id="tab-resumen" class="tab-content active space-y-4">
+            <div class="bg-white rounded-2xl p-5 shadow-sm border border-amber-100">
+                <h2 class="text-lg font-bold text-amber-900 mb-3">📊 Resumen del Día</h2>
+                <div class="grid grid-cols-2 gap-3 mb-4">
+                    <div class="bg-amber-50 p-3 rounded-xl border border-amber-200">
+                        <p class="text-xs text-amber-700 font-medium">Huevos Recolectados Hoy</p>
+                        <p id="resumen-huevos-hoy" class="text-2xl font-black text-amber-900">0</p>
+                    </div>
+                    <div class="bg-rose-50 p-3 rounded-xl border border-rose-200">
+                        <p class="text-xs text-rose-700 font-medium">Bajas Registradas Hoy</p>
+                        <p id="resumen-bajas-hoy" class="text-2xl font-black text-rose-900">0</p>
+                    </div>
+                </div>
+                <div id="alerta-sinc" class="bg-emerald-50 text-emerald-800 p-3 rounded-xl text-xs flex items-center gap-2 border border-emerald-200">
+                    ✅ Sincronización automática activa con Firebase.
                 </div>
             </div>
 
-            <div class="card">
-                <h3>📈 Rendimiento Acumulado</h3>
-                <div class="grafica-container">
-                    <div class="barra-wrapper">
-                        <div id="barra-g" class="barra" style="height: 5%;">0</div>
-                        <span class="barra-label">Grandes</span>
-                    </div>
-                    <div class="barra-wrapper">
-                        <div id="barra-m" class="barra" style="height: 5%; background: #f59e0b;">0</div>
-                        <span class="barra-label">Medio</span>
-                    </div>
-                    <div class="barra-wrapper">
-                        <div id="barra-d" class="barra" style="height: 5%; background: #fbbf24;">0</div>
-                        <span class="barra-label">Derecha</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="card">
-                <h3>📜 Historial y Edición de Registros</h3>
-                <div id="lista-registros" style="max-height: 180px; overflow-y: auto;">
-                    <p style="color: var(--text-light); font-size: 0.9rem; text-align: center; margin: 10px 0;">No hay registros guardados.</p>
-                </div>
+            <!-- Gráfico de Producción Semanal -->
+            <div class="bg-white rounded-2xl p-5 shadow-sm border border-amber-100">
+                <h3 class="text-md font-bold text-amber-900 mb-2">📈 Tendencia de Producción</h3>
+                <canvas id="graficoProduccion" height="120"></canvas>
             </div>
         </div>
 
-        <!-- SECCION PRODUCCION -->
-        <div id="sec-produccion" class="seccion" style="display: none;">
-            <div class="card">
-                <h3>🥚 Registrar o Editar Recolección y Bajas</h3>
-                
-                <label style="margin-top: 5px; display: block; font-size: 0.9rem;">Fecha del registro:</label>
-                <input type="date" id="input-fecha" style="margin-bottom: 12px;">
-
-                <p style="font-size: 0.85rem; font-weight: bold; color: var(--primary-dark); margin-bottom: 5px;">Huevos Recolectados:</p>
-                <div class="bloque-grid">
-                    <div class="bloque-card">
-                        <h4>Grandes</h4>
-                        <div class="input-con-flechas">
-                            <button class="btn-stepper btn-stepper-left" onclick="ajustarValor('input-grandes', -1)">-</button>
-                            <input type="number" id="input-grandes" value="0" style="text-align: center;">
-                            <button class="btn-stepper btn-stepper-right" onclick="ajustarValor('input-grandes', 1)">+</button>
-                        </div>
-                    </div>
-                    <div class="bloque-card">
-                        <h4>Medio</h4>
-                        <div class="input-con-flechas">
-                            <button class="btn-stepper btn-stepper-left" onclick="ajustarValor('input-medio', -1)">-</button>
-                            <input type="number" id="input-medio" value="0" style="text-align: center;">
-                            <button class="btn-stepper btn-stepper-right" onclick="ajustarValor('input-medio', 1)">+</button>
-                        </div>
-                    </div>
-                    <div class="bloque-card">
-                        <h4>Derecha</h4>
-                        <div class="input-con-flechas">
-                            <button class="btn-stepper btn-stepper-left" onclick="ajustarValor('input-derecha', -1)">-</button>
-                            <input type="number" id="input-derecha" value="0" style="text-align: center;">
-                            <button class="btn-stepper btn-stepper-right" onclick="ajustarValor('input-derecha', 1)">+</button>
-                        </div>
-                    </div>
-                </div>
-
-                <p style="font-size: 0.85rem; font-weight: bold; color: #dc2626; margin-bottom: 5px;">Mortalidad / Bajas del día (Resta gallinas):</p>
-                <div class="bloque-grid">
-                    <div class="bloque-card bloque-card-bajas">
-                        <h4>B. Grandes</h4>
-                        <div class="input-con-flechas">
-                            <button class="btn-stepper btn-stepper-left" onclick="ajustarValor('baja-grandes', -1)">-</button>
-                            <input type="number" id="baja-grandes" value="0" style="text-align: center;">
-                            <button class="btn-stepper btn-stepper-right" onclick="ajustarValor('baja-grandes', 1)">+</button>
-                        </div>
-                    </div>
-                    <div class="bloque-card bloque-card-bajas">
-                        <h4>B. Medio</h4>
-                        <div class="input-con-flechas">
-                            <button class="btn-stepper btn-stepper-left" onclick="ajustarValor('baja-medio', -1)">-</button>
-                            <input type="number" id="baja-medio" value="0" style="text-align: center;">
-                            <button class="btn-stepper btn-stepper-right" onclick="ajustarValor('baja-medio', 1)">+</button>
-                        </div>
-                    </div>
-                    <div class="bloque-card bloque-card-bajas">
-                        <h4>B. Derecha</h4>
-                        <div class="input-con-flechas">
-                            <button class="btn-stepper btn-stepper-left" onclick="ajustarValor('baja-derecha', -1)">-</button>
-                            <input type="number" id="baja-derecha" value="0" style="text-align: center;">
-                            <button class="btn-stepper btn-stepper-right" onclick="ajustarValor('baja-derecha', 1)">+</button>
-                        </div>
-                    </div>
-                </div>
-
-                <button onclick="guardarProduccion()" style="margin-top: 5px;">💾 Guardar / Actualizar Registro</button>
-            </div>
-        </div>
-
-        <!-- SECCION VENTAS -->
-        <div id="sec-ventas" class="seccion" style="display: none;">
-            <div class="card">
-                <h3 id="titulo-venta-form">💰 Registro de Ventas</h3>
-
-                <input type="hidden" id="edit-venta-id" value="">
-
-                <label style="margin-top: 5px; display: block; font-size: 0.9rem;">Nombre del Cliente:</label>
-                <input type="text" id="venta-cliente" placeholder="Ej. Juan Pérez" style="margin-bottom: 10px;">
-                
-                <label style="display: block; font-size: 0.9rem;">Categoría / Tamaño:</label>
-                <select id="venta-tamano" style="margin-bottom: 10px;">
-                    <option value="Cartón Extras">🥚 Cartón Extras</option>
-                    <option value="Cartón Jumbos">🥚 Cartón Jumbos</option>
-                    <option value="Cartón Primera">🥚 Cartón Primera</option>
-                    <option value="Cartón Segunda">🥚 Cartón Segunda</option>
-                    <option value="Cartón Tercera">🥚 Cartón Tercera</option>
-                    <option value="Blister / Medida libre">📦 Blister / Otra medida</option>
-                </select>
-
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+        <!-- 2. PRODUCCIÓN -->
+        <div id="tab-produccion" class="tab-content space-y-4">
+            <div class="bg-white rounded-2xl p-5 shadow-sm border border-amber-100">
+                <h2 class="text-lg font-bold text-amber-900 mb-4">📝 Registrar Producción y Bajas</h2>
+                <form id="form-produccion" onsubmit="guardarProduccion(event)" class="space-y-4">
                     <div>
-                        <label style="display: block; font-size: 0.9rem;">Precio Unit. (Bs):</label>
-                        <input type="number" id="venta-precio" placeholder="0" oninput="calcularTotalVenta()" style="text-align: center; font-weight: bold; color: var(--primary);">
+                        <label class="block text-xs font-bold text-slate-600 mb-1">Fecha</label>
+                        <input type="date" id="prod-fecha" class="w-full p-3 border rounded-xl bg-slate-50 font-medium text-sm focus:ring-2 focus:ring-amber-500 outline-none" required>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">Galpón Grandes</label>
+                            <input type="number" id="prod-grandes" placeholder="Huevos" class="w-full p-3 border rounded-xl bg-slate-50 text-sm focus:ring-2 focus:ring-amber-500 outline-none" min="0">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">Bajas Grandes</label>
+                            <input type="number" id="bajas-grandes" placeholder="Bajas" class="w-full p-3 border rounded-xl bg-slate-50 text-sm focus:ring-2 focus:ring-amber-500 outline-none" value="0" min="0">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">Galpón Medio</label>
+                            <input type="number" id="prod-medio" placeholder="Huevos" class="w-full p-3 border rounded-xl bg-slate-50 text-sm focus:ring-2 focus:ring-amber-500 outline-none" min="0">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">Bajas Medio</label>
+                            <input type="number" id="bajas-medio" placeholder="Bajas" class="w-full p-3 border rounded-xl bg-slate-50 text-sm focus:ring-2 focus:ring-amber-500 outline-none" value="0" min="0">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">Galpón Derecha</label>
+                            <input type="number" id="prod-derecha" placeholder="Huevos" class="w-full p-3 border rounded-xl bg-slate-50 text-sm focus:ring-2 focus:ring-amber-500 outline-none" min="0">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">Bajas Derecha</label>
+                            <input type="number" id="bajas-derecha" placeholder="Bajas" class="w-full p-3 border rounded-xl bg-slate-50 text-sm focus:ring-2 focus:ring-amber-500 outline-none" value="0" min="0">
+                        </div>
+                    </div>
+                    <button type="submit" class="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold p-3 rounded-xl shadow transition">
+                        Guardar Registro Diario
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- 3. VENTAS -->
+        <div id="tab-ventas" class="tab-content space-y-4">
+            <div class="bg-white rounded-2xl p-5 shadow-sm border border-amber-100">
+                <h2 class="text-lg font-bold text-amber-900 mb-4">🛒 Registrar Venta</h2>
+                <form id="form-ventas" onsubmit="guardarVenta(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">Fecha</label>
+                        <input type="date" id="venta-fecha" class="w-full p-3 border rounded-xl bg-slate-50 font-medium text-sm outline-none" required>
                     </div>
                     <div>
-                        <label style="display: block; font-size: 0.9rem;">Cantidad:</label>
-                        <div class="input-con-flechas">
-                            <button class="btn-stepper btn-stepper-left" onclick="ajustarValor('venta-cantidad', -1); calcularTotalVenta();">-</button>
-                            <input type="number" id="venta-cantidad" value="1" oninput="calcularTotalVenta()" style="text-align: center;">
-                            <button class="btn-stepper btn-stepper-right" onclick="ajustarValor('venta-cantidad', 1); calcularTotalVenta();">+</button>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">Cliente / Detalle</label>
+                        <input type="text" id="venta-cliente" placeholder="Ej. Cliente Mayorista / Casero" class="w-full p-3 border rounded-xl bg-slate-50 text-sm outline-none" required>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">Cantidad (Maples/Unid)</label>
+                            <input type="number" id="venta-cantidad" placeholder="0" class="w-full p-3 border rounded-xl bg-slate-50 text-sm outline-none" required min="1">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">Monto Total (Bs)</label>
+                            <input type="number" step="0.01" id="venta-monto" placeholder="0.00" class="w-full p-3 border rounded-xl bg-slate-50 text-sm outline-none" required min="0">
                         </div>
                     </div>
-                </div>
-
-                <label style="margin-top: 10px; display: block; font-size: 0.9rem;">Condición de Pago:</label>
-                <select id="venta-condicion" style="margin-bottom: 10px;">
-                    <option value="Contado">💵 Al Contado</option>
-                    <option value="Crédito">⏳ Al Crédito</option>
-                </select>
-
-                <p style="margin-top: 5px; font-size: 1rem;">Total a cobrar: <strong id="venta-total-calc" style="color: var(--primary); font-size: 1.2rem;">0 Bs</strong></p>
-
-                <button id="btn-guardar-venta" onclick="guardarVenta()" style="margin-top: 10px;">💾 Registrar Venta</button>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">Condición de Pago</label>
+                        <select id="venta-tipo" class="w-full p-3 border rounded-xl bg-slate-50 text-sm outline-none">
+                            <option value="Contado">Efectivo / Contado</option>
+                            <option value="Crédito">Crédito (Por cobrar)</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold p-3 rounded-xl shadow transition">
+                        Registrar Venta
+                    </button>
+                </form>
             </div>
+        </div>
 
-            <div class="card">
-                <h3>📜 Historial de Ventas</h3>
-                <div id="lista-ventas" style="max-height: 150px; overflow-y: auto;">
-                    <p style="color: var(--text-light); font-size: 0.9rem; text-align: center; margin: 10px 0;">No hay ventas registradas.</p>
+        <!-- 4. COSTOS -->
+        <div id="tab-costos" class="tab-content space-y-4">
+            <div class="bg-white rounded-2xl p-5 shadow-sm border border-amber-100">
+                <h2 class="text-lg font-bold text-amber-900 mb-4">🏷️ Registrar Gasto o Costo</h2>
+                <form id="form-costos" onsubmit="guardarCosto(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">Fecha</label>
+                        <input type="date" id="costo-fecha" class="w-full p-3 border rounded-xl bg-slate-50 font-medium text-sm outline-none" required>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">Concepto</label>
+                        <input type="text" id="costo-concepto" placeholder="Ej. Compra de alimento / Vacunas" class="w-full p-3 border rounded-xl bg-slate-50 text-sm outline-none" required>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">Monto (Bs)</label>
+                        <input type="number" step="0.01" id="costo-monto" placeholder="0.00" class="w-full p-3 border rounded-xl bg-slate-50 text-sm outline-none" required min="0">
+                    </div>
+                    <button type="submit" class="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold p-3 rounded-xl shadow transition">
+                        Guardar Gasto
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- 5. FINANZAS -->
+        <div id="tab-finanzas" class="tab-content space-y-4">
+            <div class="bg-white rounded-2xl p-5 shadow-sm border border-amber-100 space-y-4">
+                <h2 class="text-lg font-bold text-amber-900 mb-2">💰 Balance General</h2>
+                <div class="grid grid-cols-3 gap-2 text-center">
+                    <div class="bg-emerald-50 p-3 rounded-xl border border-emerald-200">
+                        <p class="text-xs text-emerald-700 font-medium">Ingresos</p>
+                        <p id="fin-ingresos" class="text-sm font-bold text-emerald-900">0 Bs</p>
+                    </div>
+                    <div class="bg-rose-50 p-3 rounded-xl border border-rose-200">
+                        <p class="text-xs text-rose-700 font-medium">Gastos</p>
+                        <p id="fin-gastos" class="text-sm font-bold text-rose-900">0 Bs</p>
+                    </div>
+                    <div class="bg-amber-50 p-3 rounded-xl border border-amber-200">
+                        <p class="text-xs text-amber-700 font-medium">Utilidad Neta</p>
+                        <p id="fin-utilidad" class="text-sm font-bold text-amber-900">0 Bs</p>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- SECCION COSTOS -->
-        <div id="sec-costos" class="seccion" style="display: none;">
-            <div class="card">
-                <h3>📋 Registro de Costos / Alimento</h3>
-                <label>Descripción del gasto:</label>
-                <input type="text" id="costo-desc" placeholder="Ej. Compra de alimento balanceado">
-                <label style="margin-top: 10px; display: block;">Monto (Bs):</label>
-                <input type="number" id="costo-monto" placeholder="Ej. 250">
-                <button onclick="guardarCosto()" style="margin-top: 15px;">💾 Guardar Costo</button>
-            </div>
-
-            <div class="card">
-                <h3>📜 Historial de Costos</h3>
-                <div id="lista-costos" style="max-height: 150px; overflow-y: auto;">
-                    <p style="color: var(--text-light); font-size: 0.9rem; text-align: center; margin: 10px 0;">No hay costos registrados.</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- SECCION FINANZAS / MARGEN -->
-        <div id="sec-finanzas" class="seccion" style="display: none;">
-            <div class="card">
-                <h3>📈 Balance Financiero y Utilidad</h3>
-                <p style="font-size: 0.85rem; color: var(--text-light); margin-bottom: 15px;">Resumen gráfico de tus ingresos, costos y utilidad neta.</p>
-                
-                <div class="finanzas-grid">
-                    <div class="finanza-box">
-                        <span>💰 Total Ingresos Ventas:</span>
-                        <strong id="fin-ingresos" style="color: #059669; font-size: 1.1rem;">0 Bs</strong>
-                    </div>
-                    <div class="finanza-box">
-                        <span>📋 Total Costos / Gastos:</span>
-                        <strong id="fin-costos" style="color: #dc2626; font-size: 1.1rem;">0 Bs</strong>
-                    </div>
-                    <div class="finanza-box utilidad">
-                        <span>⭐ Utilidad Neta (Margen):</span>
-                        <strong id="fin-utilidad" style="color: #047857; font-size: 1.2rem;">0 Bs</strong>
-                    </div>
-                </div>
-
-                <div style="margin-top: 20px; border-top: 1px solid var(--border); padding-top: 15px;">
-                    <h4 style="margin: 0 0 10px 0; font-size: 0.95rem; color: var(--primary-dark);">📊 Representación Visual del Negocio</h4>
-                    <div class="finanzas-grafica-creativa">
-                        <div class="fin-barra-item">
-                            <div class="fin-barra-info">
-                                <span style="color: #059669;">Ingresos</span>
-                                <span id="lbl-porc-ingresos">0%</span>
-                            </div>
-                            <div class="fin-barra-pista">
-                                <div id="bar-ingresos" class="fin-barra-progreso" style="width: 0%; background: #059669;">0 Bs</div>
-                            </div>
-                        </div>
-
-                        <div class="fin-barra-item">
-                            <div class="fin-barra-info">
-                                <span style="color: #dc2626;">Costos</span>
-                                <span id="lbl-porc-costos">0%</span>
-                            </div>
-                            <div class="fin-barra-pista">
-                                <div id="bar-costos" class="fin-barra-progreso" style="width: 0%; background: #dc2626;">0 Bs</div>
-                            </div>
-                        </div>
-
-                        <div class="fin-barra-item">
-                            <div class="fin-barra-info">
-                                <span style="color: #047857;">Utilidad Neta</span>
-                                <span id="lbl-porc-utilidad">0%</span>
-                            </div>
-                            <div class="fin-barra-pista">
-                                <div id="bar-utilidad" class="fin-barra-progreso" style="width: 0%; background: #10b981;">0 Bs</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
     </div>
 
-    <!-- MENU INFERIOR -->
-    <nav class="nav-bottom">
-        <button id="nav-btn-resumen" class="nav-item active" onclick="cambiarSeccion(this, 'sec-resumen')">📊<br>Resumen</button>
-        <button class="nav-item" onclick="cambiarSeccion(this, 'sec-produccion')">🥚<br>Producción</button>
-        <button class="nav-item" onclick="cambiarSeccion(this, 'sec-ventas')">💰<br>Ventas</button>
-        <button class="nav-item" onclick="cambiarSeccion(this, 'sec-costos')">📋<br>Costos</button>
-        <button class="nav-item" onclick="cambiarSeccion(this, 'sec-finanzas')">📈<br>Finanzas</button>
+    <!-- Barra de Navegación Inferior -->
+    <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-amber-200 shadow-lg flex justify-around p-2 z-40 max-w-4xl mx-auto">
+        <button onclick="cambiarTab('resumen')" id="nav-resumen" class="flex flex-col items-center text-amber-700 font-bold text-xs">
+            <span class="text-lg">📊</span> Resumen
+        </button>
+        <button onclick="cambiarTab('produccion')" id="nav-produccion" class="flex flex-col items-center text-slate-400 font-medium text-xs">
+            <span class="text-lg">🥚</span> Producción
+        </button>
+        <button onclick="cambiarTab('ventas')" id="nav-ventas" class="flex flex-col items-center text-slate-400 font-medium text-xs">
+            <span class="text-lg">💰</span> Ventas
+        </button>
+        <button onclick="cambiarTab('costos')" id="nav-costos" class="flex flex-col items-center text-slate-400 font-medium text-xs">
+            <span class="text-lg">🏷️</span> Costos
+        </button>
+        <button onclick="cambiarTab('finanzas')" id="nav-finanzas" class="flex flex-col items-center text-slate-400 font-medium text-xs">
+            <span class="text-lg">📈</span> Finanzas
+        </button>
     </nav>
 
-    <!-- MODAL AJUSTES -->
-    <div id="modal-ajustes" class="modal">
-        <div class="modal-content">
-            <h3>⚙️ Configuración y Sincronización</h3>
-            
-            <label style="margin-top: 5px; display: block; font-size: 0.9rem;">Gallinas Iniciales "Grandes":</label>
-            <input type="number" id="gallinas-grandes" value="35">
-            
-            <label style="margin-top: 10px; display: block; font-size: 0.9rem;">Gallinas Iniciales "Medio":</label>
-            <input type="number" id="gallinas-medio" value="35">
-            
-            <label style="margin-top: 10px; display: block; font-size: 0.9rem;">Gallinas Iniciales "Derecha":</label>
-            <input type="number" id="gallinas-derecha" value="30">
-
-            <hr style="border: none; border-top: 1px solid var(--border); margin: 15px 0;">
-
-            <h4 style="margin: 0 0 5px 0; font-size: 0.95rem; color: var(--primary-dark);">🔄 Sincronizar con el Celular / PC</h4>
-            <p style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 8px;">Copia este código de respaldo en la computadora y pégalo en el celular para pasar los datos al instante:</p>
-            
-            <textarea id="codigo-respaldo" rows="3" placeholder="Aquí aparecerán tus datos..." style="font-size: 0.75rem; font-family: monospace;"></textarea>
-
-            <div style="display: flex; gap: 8px; margin-top: 8px;">
-                <button onclick="copiarCodigo()" style="background: #3b82f6; font-size: 0.85rem; padding: 8px;">📋 Copiar</button>
-                <button onclick="pegarCodigo()" style="background: #10b981; font-size: 0.85rem; padding: 8px;">📥 Cargar</button>
+    <!-- Ventana Modal de Configuración -->
+    <div id="modal-config" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl p-6 max-w-md w-full shadow-xl space-y-4">
+            <h3 class="text-lg font-bold text-amber-900">⚙️ Configuración de Galpones</h3>
+            <div>
+                <label class="block text-xs font-bold text-slate-600 mb-1">Gallinas Iniciales "Grandes":</label>
+                <input type="number" id="cfg-grandes" class="w-full p-3 border rounded-xl bg-slate-50 text-sm outline-none">
             </div>
-
-            <div style="display: flex; gap: 10px; margin-top: 20px;">
-                <button onclick="cerrarAjustes()" style="background: #6b7280;">Cerrar</button>
-                <button onclick="guardarAjustes()">Guardar Galpones</button>
+            <div>
+                <label class="block text-xs font-bold text-slate-600 mb-1">Gallinas Iniciales "Medio":</label>
+                <input type="number" id="cfg-medio" class="w-full p-3 border rounded-xl bg-slate-50 text-sm outline-none">
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-slate-600 mb-1">Gallinas Iniciales "Derecha":</label>
+                <input type="number" id="cfg-derecha" class="w-full p-3 border rounded-xl bg-slate-50 text-sm outline-none">
+            </div>
+            <div class="flex gap-2 pt-2">
+                <button onclick="cerrarConfig()" class="flex-1 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold p-3 rounded-xl transition">Cancelar</button>
+                <button onclick="guardarConfig()" class="flex-1 bg-amber-600 hover:bg-amber-700 text-white font-bold p-3 rounded-xl transition">Guardar</button>
             </div>
         </div>
     </div>
 
+    <!-- Script Principal con Firebase -->
     <script>
-        let usuarioActual = 'Mamá';
-        let registros = [];
-        let ventasRegistradas = [];
-        let costosRegistrados = [];
-        let galponesBase = { grandes: 35, medio: 35, derecha: 30 };
+        // Configuración de Firebase (Conectado a tu base de datos)
+        const firebaseConfig = {
+            databaseURL: "https://mini-granja-de-aitane-default-rtdb.firebaseio.com/"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
 
-        document.getElementById('input-fecha').value = new Date().toISOString().split('T')[0];
-
-        // Cargar datos locales al iniciar
-        window.onload = function() {
-            let guardadoLocal = localStorage.getItem('granja_isa_data');
-            if(guardadoLocal) {
-                try {
-                    let datos = JSON.parse(guardadoLocal);
-                    registros = datos.registros || [];
-                    ventasRegistradas = datos.ventas || [];
-                    costosRegistrados = datos.costos || [];
-                    if(datos.galpones) {
-                        galponesBase = datos.galpones;
-                        document.getElementById('gallinas-grandes').value = galponesBase.grandes;
-                        document.getElementById('gallinas-medio').value = galponesBase.medio;
-                        document.getElementById('gallinas-derecha').value = galponesBase.derecha;
-                    }
-                    actualizarPantallaResumen();
-                    actualizarListaVentas();
-                    actualizarListaCostos();
-                } catch(e) {}
-            }
+        let usuarioActual = "Mamá";
+        let dbData = {
+            galpones: { grandes: 100, medio: 80, derecha: 200 },
+            registros: [],
+            ventas: [],
+            costos: []
         };
 
-        function guardarLocalmente() {
-            let paquete = {
-                galpones: galponesBase,
-                registros: registros,
-                ventas: ventasRegistradas,
-                costos: costosRegistrados
-            };
-            localStorage.setItem('granja_isa_data', JSON.stringify(paquete));
-        }
+        let chartInstance = null;
 
-        function copiarCodigo() {
-            guardarLocalmente();
-            let guardadoLocal = localStorage.getItem('granja_isa_data');
-            let txtArea = document.getElementById('codigo-respaldo');
-            txtArea.value = guardadoLocal;
-            txtArea.select();
-            navigator.clipboard.writeText(guardadoLocal);
-            alert('¡Código de datos copiado al portapapeles! Envíatelo por WhatsApp o ábrelo en el celular para pegarlo.');
-        }
-
-        function pegarCodigo() {
-            let txtArea = document.getElementById('codigo-respaldo').value.trim();
-            if(!txtArea) {
-                alert('Por favor pega el código de respaldo en el recuadro.');
-                return;
+        // Escuchar cambios en tiempo real desde Firebase
+        db.ref('granja').on('value', (snapshot) => {
+            const data = snapshot.val();
+            if (data) {
+                dbData = data;
+                document.getElementById('sync-status').innerText = "🟢 En línea";
+                document.getElementById('sync-status').className = "text-xs bg-emerald-600 px-2 py-1 rounded-full font-semibold";
+            } else {
+                guardarEnFirebase(); // Inicializar si está vacío
             }
-            try {
-                let datos = JSON.parse(txtArea);
-                registros = datos.registros || [];
-                ventasRegistradas = datos.ventas || [];
-                costosRegistrados = datos.costos || [];
-                if(datos.galpones) {
-                    galponesBase = datos.galpones;
-                    document.getElementById('gallinas-grandes').value = galponesBase.grandes;
-                    document.getElementById('gallinas-medio').value = galponesBase.medio;
-                    document.getElementById('gallinas-derecha').value = galponesBase.derecha;
-                }
-                guardarLocalmente();
-                actualizarPantallaResumen();
-                actualizarListaVentas();
-                actualizarListaCostos();
-                alert('¡Datos cargados y sincronizados con éxito!');
-                cerrarAjustes();
-            } catch(e) {
-                alert('El código no es válido. Revisa haberlo copiado completo.');
-            }
+            actualizarPantalla();
+        }, (error) => {
+            document.getElementById('sync-status').innerText = "🔴 Sin conexión";
+            document.getElementById('sync-status').className = "text-xs bg-rose-600 px-2 py-1 rounded-full font-semibold";
+        });
+
+        function guardarEnFirebase() {
+            db.ref('granja').set(dbData);
         }
 
-        function selectUser(btn, nombre) {
-            document.querySelectorAll('.user-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
+        // Establecer fecha de hoy por defecto en los formularios
+        document.addEventListener("DOMContentLoaded", () => {
+            const hoy = new Date().toISOString().split('T')[0];
+            document.getElementById('prod-fecha').value = hoy;
+            document.getElementById('venta-fecha').value = hoy;
+            document.getElementById('costo-fecha').value = hoy;
+        });
+
+        function cambiarUsuario(nombre) {
             usuarioActual = nombre;
-        }
-
-        function cambiarSeccion(btn, idSeccion) {
-            document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-
-            document.querySelectorAll('.seccion').forEach(s => {
-                s.style.display = 'none';
-                s.classList.remove('active');
+            ['Mama', 'Yo', 'Jeanine'].forEach(u => {
+                const btn = document.getElementById(`btn-${u}`);
+                if (u === nombre) {
+                    btn.className = "px-4 py-2 rounded-lg font-semibold text-sm transition bg-amber-600 text-white shadow";
+                } else {
+                    btn.className = "px-4 py-2 rounded-lg font-semibold text-sm transition bg-slate-100 text-slate-600";
+                }
             });
-
-            const seccionDeseada = document.getElementById(idSeccion);
-            if (seccionDeseada) {
-                seccionDeseada.style.display = 'block';
-                seccionDeseada.classList.add('active');
-            }
-            if(idSeccion === 'sec-finanzas') {
-                actualizarFinanzas();
-            }
         }
 
-        function ajustarValor(idInput, cambio) {
-            const input = document.getElementById(idInput);
-            let val = parseInt(input.value) || 0;
-            val += cambio;
-            if (val < 0) val = 0;
-            input.value = val;
-            if(idInput.includes('input-')) {
-                calcularEnTiempoReal();
-            }
-        }
-
-        function abrirAjustes() { 
-            // Cargar datos actuales en el textarea al abrir ajustes
-            let guardadoLocal = localStorage.getItem('granja_isa_data');
-            if(guardadoLocal) document.getElementById('codigo-respaldo').value = guardadoLocal;
-            document.getElementById('modal-ajustes').style.display = 'flex'; 
-        }
-
-        function cerrarAjustes() { document.getElementById('modal-ajustes').style.display = 'none'; }
-
-        function guardarAjustes() {
-            galponesBase.grandes = parseInt(document.getElementById('gallinas-grandes').value) || 1;
-            galponesBase.medio = parseInt(document.getElementById('gallinas-medio').value) || 1;
-            galponesBase.derecha = parseInt(document.getElementById('gallinas-derecha').value) || 1;
-            guardarLocalmente();
-            alert('¡Configuración guardada correctamente!');
-            cerrarAjustes();
-            actualizarPantallaResumen();
-        }
-
-        function calcularEnTiempoReal() {
-            let bajasG = 0, bajasM = 0, bajasD = 0;
-            registros.forEach(r => {
-                bajasG += (r.bg || 0);
-                bajasM += (r.bm || 0);
-                bajasD += (r.bd || 0);
+        function cambiarTab(tabId) {
+            ['resumen', 'produccion', 'ventas', 'costos', 'finanzas'].forEach(t => {
+                document.getElementById(`tab-${t}`).classList.remove('active');
+                document.getElementById(`nav-${t}`).className = "flex flex-col items-center text-slate-400 font-medium text-xs";
             });
-
-            const actG = Math.max(galponesBase.grandes - bajasG, 1);
-            const actM = Math.max(galponesBase.medio - bajasM, 1);
-            const actD = Math.max(galponesBase.derecha - bajasD, 1);
-
-            const g = parseInt(document.getElementById('input-grandes').value) || 0;
-            const m = parseInt(document.getElementById('input-medio').value) || 0;
-            const d = parseInt(document.getElementById('input-derecha').value) || 0;
-            const total = g + m + d;
-
-            const pG = Math.round((g / actG) * 100);
-            const pM = Math.round((m / actM) * 100);
-            const pD = Math.round((d / actD) * 100);
-
-            document.getElementById('huevos-total').innerText = total;
-            document.getElementById('postura-grandes').innerText = pG + '%';
-            document.getElementById('postura-medio').innerText = pM + '%';
-            document.getElementById('postura-derecha').innerText = pD + '%';
+            document.getElementById(`tab-${tabId}`).classList.add('active');
+            document.getElementById(`nav-${tabId}`).className = "flex flex-col items-center text-amber-700 font-bold text-xs";
         }
 
-        document.getElementById('input-grandes').addEventListener('input', calcularEnTiempoReal);
-        document.getElementById('input-medio').addEventListener('input', calcularEnTiempoReal);
-        document.getElementById('input-derecha').addEventListener('input', calcularEnTiempoReal);
+        function guardarProduccion(e) {
+            e.preventDefault();
+            const nuevoRegistro = {
+                id: Date.now(),
+                fecha: document.getElementById('prod-fecha').value,
+                usuario: usuarioActual,
+                grandes: parseInt(document.getElementById('prod-grandes').value) || 0,
+                bajasGrandes: parseInt(document.getElementById('bajas-grandes').value) || 0,
+                medio: parseInt(document.getElementById('prod-medio').value) || 0,
+                bajasMedio: parseInt(document.getElementById('bajas-medio').value) || 0,
+                derecha: parseInt(document.getElementById('prod-derecha').value) || 0,
+                bajasDerecha: parseInt(document.getElementById('bajas-derecha').value) || 0,
+            };
+            dbData.registros.push(nuevoRegistro);
+            guardarEnFirebase();
+            alert("¡Registro guardado y sincronizado con éxito!");
+            document.getElementById('form-produccion').reset();
+            document.getElementById('prod-fecha').value = new Date().toISOString().split('T')[0];
+            cambiarTab('resumen');
+        }
 
-        function guardarProduccion() {
-            const fecha = document.getElementById('input-fecha').value;
-            const g = parseInt(document.getElementById('input-grandes').value) || 0;
-            const m = parseInt(document.getElementById('input-medio').value) || 0;
-            const d = parseInt(document.getElementById('input-derecha').value) || 0;
+        function guardarVenta(e) {
+            e.preventDefault();
+            const nuevaVenta = {
+                id: Date.now(),
+                fecha: document.getElementById('venta-fecha').value,
+                usuario: usuarioActual,
+                cliente: document.getElementById('venta-cliente').value,
+                cantidad: parseFloat(document.getElementById('venta-cantidad').value) || 0,
+                monto: parseFloat(document.getElementById('venta-monto').value) || 0,
+                tipo: document.getElementById('venta-tipo').value
+            };
+            dbData.ventas.push(nuevaVenta);
+            guardarEnFirebase();
+            alert("¡Venta registrada y sincronizada!");
+            document.getElementById('form-ventas').reset();
+            document.getElementById('venta-fecha').value = new Date().toISOString().split('T')[0];
+            cambiarTab('finanzas');
+        }
+
+        function guardarCosto(e) {
+            e.preventDefault();
+            const nuevoCosto = {
+                id: Date.now(),
+                fecha: document.getElementById('costo-fecha').value,
+                usuario: usuarioActual,
+                concepto: document.getElementById('costo-concepto').value,
+                monto: parseFloat(document.getElementById('costo-monto').value) || 0
+            };
+            dbData.costos.push(nuevoCosto);
+            guardarEnFirebase();
+            alert("¡Gasto registrado y sincronizado!");
+            document.getElementById('form-costos').reset();
+            document.getElementById('costo-fecha').value = new Date().toISOString().split('T')[0];
+            cambiarTab('finanzas');
+        }
+
+        function abrirConfig() {
+            document.getElementById('cfg-grandes').value = dbData.galpones.grandes;
+            document.getElementById('cfg-medio').value = dbData.galpones.medio;
+            document.getElementById('cfg-derecha').value = dbData.galpones.derecha;
+            document.getElementById('modal-config').classList.remove('hidden');
+        }
+
+        function cerrarConfig() {
+            document.getElementById('modal-config').classList.add('hidden');
+        }
+
+        function guardarConfig() {
+            dbData.galpones = {
+                grandes: parseInt(document.getElementById('cfg-grandes').value) || 0,
+                medio: parseInt(document.getElementById('cfg-medio').value) || 0,
+                derecha: parseInt(document.getElementById('cfg-derecha').value) || 0
+            };
+            guardarEnFirebase();
+            cerrarConfig();
+        }
+
+        function actualizarPantalla() {
+            const hoy = new Date().toISOString().split('T')[0];
             
-            const bg = parseInt(document.getElementById('baja-grandes').value) || 0;
-            const bm = parseInt(document.getElementById('baja-medio').value) || 0;
-            const bd = parseInt(document.getElementById('baja-derecha').value) || 0;
-
-            const totalH = g + m + d;
-            const totalB = bg + bm + bd;
-
-            if(!fecha || (totalH === 0 && totalB === 0)) {
-                alert('Por favor seleccione una fecha e ingrese huevos o bajas.');
-                return;
-            }
-
-            let index = registros.findIndex(r => r.fecha === fecha);
-            const dataReg = { fecha, usuario: usuarioActual, g, m, d, bg, bm, bd, total: totalH, hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) };
-
-            if(index >= 0) {
-                registros[index] = dataReg;
-                alert(`¡Registro del ${fecha} actualizado por [${usuarioActual}]!`);
-            } else {
-                registros.push(dataReg);
-                alert(`¡Registro para el ${fecha} guardado con éxito!`);
-            }
-
-            guardarLocalmente();
-            actualizarPantallaResumen();
-
-            document.getElementById('input-grandes').value = 0;
-            document.getElementById('input-medio').value = 0;
-            document.getElementById('input-derecha').value = 0;
-            document.getElementById('baja-grandes').value = 0;
-            document.getElementById('baja-medio').value = 0;
-            document.getElementById('baja-derecha').value = 0;
-            document.getElementById('nav-btn-resumen').click();
-        }
-
-        function editarRegistro(fecha) {
-            let r = registros.find(item => item.fecha === fecha);
-            if(r) {
-                document.getElementById('input-fecha').value = r.fecha;
-                document.getElementById('input-grandes').value = r.g;
-                document.getElementById('input-medio').value = r.m;
-                document.getElementById('input-derecha').value = r.d;
-                document.getElementById('baja-grandes').value = r.bg || 0;
-                document.getElementById('baja-medio').value = r.bm || 0;
-                document.getElementById('baja-derecha').value = r.bd || 0;
-                calcularEnTiempoReal();
-                document.querySelectorAll('.nav-item')[1].click();
-            }
-        }
-
-        function actualizarPantallaResumen() {
-            let totalG = 0, totalM = 0, totalD = 0, totalH = 0, totalBajas = 0;
-            let sumBajasG = 0, sumBajasM = 0, sumBajasD = 0;
-
-            registros.forEach(r => {
-                totalG += r.g;
-                totalM += r.m;
-                totalD += r.d;
-                totalH += r.total;
-                totalBajas += ((r.bg || 0) + (r.bm || 0) + (r.bd || 0));
-                sumBajasG += (r.bg || 0);
-                sumBajasM += (r.bm || 0);
-                sumBajasD += (r.bd || 0);
+            // Calcular totales de hoy
+            let huevosHoy = 0;
+            let bajasHoy = 0;
+            dbData.registros.filter(r => r.fecha === hoy).forEach(r => {
+                huevosHoy += (r.grandes + r.medio + r.derecha);
+                bajasHoy += (r.bajasGrandes + r.bajasMedio + r.bajasDerecha);
             });
 
-            const actG = Math.max(galponesBase.grandes - sumBajasG, 0);
-            const actM = Math.max(galponesBase.medio - sumBajasM, 0);
-            const actD = Math.max(galponesBase.derecha - sumBajasD, 0);
+            document.getElementById('resumen-huevos-hoy').innerText = huevosHoy;
+            document.getElementById('resumen-bajas-hoy').innerText = bajasHoy;
 
-            document.getElementById('activas-grandes').innerText = `(${actG} gallinas)`;
-            document.getElementById('activas-medio').innerText = `(${actM} gallinas)`;
-            document.getElementById('activas-derecha').innerText = `(${actD} gallinas)`;
-            document.getElementById('bajas-total').innerText = totalBajas;
+            // Calcular Finanzas
+            let totalIngresos = dbData.ventas.reduce((acc, v) => acc + v.monto, 0);
+            let totalGastos = dbData.costos.reduce((acc, c) => acc + c.monto, 0);
+            let utilidad = totalIngresos - totalGastos;
 
-            const cantRegistros = registros.length || 1;
-            const baseGPromedio = Math.max(actG, 1);
-            const baseMPromedio = Math.max(actM, 1);
-            const baseDPromedio = Math.max(actD, 1);
+            document.getElementById('fin-ingresos').innerText = totalIngresos.toFixed(2) + " Bs";
+            document.getElementById('fin-gastos').innerText = totalGastos.toFixed(2) + " Bs";
+            document.getElementById('fin-utilidad').innerText = utilidad.toFixed(2) + " Bs";
 
-            const pG = Math.round((totalG / (baseGPromedio * cantRegistros)) * 100);
-            const pM = Math.round((totalM / (baseMPromedio * cantRegistros)) * 100);
-            const pD = Math.round((totalD / (baseDPromedio * cantRegistros)) * 100);
-
-            document.getElementById('huevos-total').innerText = totalH;
-            document.getElementById('postura-grandes').innerText = isNaN(pG) ? '0%' : pG + '%';
-            document.getElementById('postura-medio').innerText = isNaN(pM) ? '0%' : pM + '%';
-            document.getElementById('postura-derecha').innerText = isNaN(pD) ? '0%' : pD + '%';
-            document.getElementById('cant-grandes').innerText = `(${totalG}h)`;
-            document.getElementById('cant-medio').innerText = `(${totalM}h)`;
-            document.getElementById('cant-derecha').innerText = `(${totalD}h)`;
-
-            const maxVal = Math.max(totalG, totalM, totalD, 10);
-            document.getElementById('barra-g').style.height = Math.max(Math.round((totalG / maxVal) * 100), 5) + '%';
-            document.getElementById('barra-g').innerText = totalG;
-            document.getElementById('barra-m').style.height = Math.max(Math.round((totalM / maxVal) * 100), 5) + '%';
-            document.getElementById('barra-m').innerText = totalM;
-            document.getElementById('barra-d').style.height = Math.max(Math.round((totalD / maxVal) * 100), 5) + '%';
-            document.getElementById('barra-d').innerText = totalD;
-
-            document.getElementById('lista-registros').innerHTML = registros.length === 0 
-                ? '<p style="color: var(--text-light); font-size: 0.9rem; text-align: center; margin: 10px 0;">No hay registros guardados.</p>'
-                : registros.map(r => `
-                    <div class="historial-item">
-                        <span><strong>📅 ${r.fecha}</strong> (${r.usuario}): H:[G:${r.g} M:${r.m} D:${r.d}] | Bajas:[${(r.bg||0)+(r.bm||0)+(r.bd||0)}]</span>
-                        <button onclick="editarRegistro('${r.fecha}')" style="width: auto; padding: 4px 8px; font-size: 0.75rem; background: #3b82f6;">✏️</button>
-                    </div>
-                `).join('');
+            actualizarGrafico();
         }
 
-        function calcularTotalVenta() {
-            const precio = parseFloat(document.getElementById('venta-precio').value) || 0;
-            const cantidad = parseFloat(document.getElementById('venta-cantidad').value) || 0;
-            document.getElementById('venta-total-calc').innerText = (precio * cantidad) + ' Bs';
-        }
-
-        function guardarVenta() {
-            const editId = document.getElementById('edit-venta-id').value;
-            const cliente = document.getElementById('venta-cliente').value.trim();
-            const tamano = document.getElementById('venta-tamano').value;
-            const precio = parseFloat(document.getElementById('venta-precio').value) || 0;
-            const cantidad = parseFloat(document.getElementById('venta-cantidad').value) || 0;
-            const condicion = document.getElementById('venta-condicion').value;
-
-            if(!cliente || !cantidad || cantidad <= 0 || !precio) {
-                alert('Por favor ingrese el cliente, una cantidad y precio válidos.');
-                return;
-            }
-
-            const total = precio * cantidad;
-
-            if(editId !== "") {
-                ventasRegistradas[editId] = { cliente, tamano, precio, cantidad, total, condicion, usuario: usuarioActual, hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) };
-                document.getElementById('edit-venta-id').value = "";
-                document.getElementById('titulo-venta-form').innerText = "💰 Registro de Ventas";
-                document.getElementById('btn-guardar-venta').innerText = "💾 Registrar Venta";
-                alert(`¡Venta de [${cliente}] actualizada con éxito!`);
-            } else {
-                ventasRegistradas.push({ cliente, tamano, precio, cantidad, total, condicion, usuario: usuarioActual, hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) });
-                alert(`¡Venta registrada para [${cliente}]! (${total} Bs - ${condicion})`);
-            }
-
-            guardarLocalmente();
-            actualizarListaVentas();
-
-            document.getElementById('venta-cliente').value = '';
-            document.getElementById('venta-precio').value = '';
-            document.getElementById('venta-cantidad').value = 1;
-            document.getElementById('venta-total-calc').innerText = '0 Bs';
-            document.getElementById('nav-btn-resumen').click();
-        }
-
-        function actualizarListaVentas() {
-            document.getElementById('lista-ventas').innerHTML = ventasRegistradas.length === 0
-                ? '<p style="color: var(--text-light); font-size: 0.9rem; text-align: center; margin: 10px 0;">No hay ventas registradas.</p>'
-                : ventasRegistradas.map((v, index) => `
-                    <div class="historial-item">
-                        <span><strong>👤 ${v.cliente}</strong> (${v.condicion}): ${v.cantidad}x ${v.tamano} (${v.precio} Bs) = <strong>${v.total} Bs</strong></span>
-                        <button onclick="editarVenta(${index})" style="width: auto; padding: 4px 8px; font-size: 0.75rem; background: #3b82f6;">✏️</button>
-                    </div>
-                `).join('');
-        }
-
-        function editarVenta(index) {
-            let v = ventasRegistradas[index];
-            if(v) {
-                document.getElementById('edit-venta-id').value = index;
-                document.getElementById('venta-cliente').value = v.cliente;
-                document.getElementById('venta-tamano').value = v.tamano;
-                document.getElementById('venta-precio').value = v.precio;
-                document.getElementById('venta-cantidad').value = v.cantidad;
-                document.getElementById('venta-condicion').value = v.condicion;
-                calcularTotalVenta();
-
-                document.getElementById('titulo-venta-form').innerText = "✏️ Editando Venta";
-                document.getElementById('btn-guardar-venta').innerText = "💾 Actualizar Venta";
-
-                document.querySelectorAll('.nav-item')[2].click();
-            }
-        }
-
-        function guardarCosto() {
-            const desc = document.getElementById('costo-desc').value.trim();
-            const monto = parseFloat(document.getElementById('costo-monto').value) || 0;
-            if(!desc || !monto) {
-                alert('Por favor complete los campos del costo');
-                return;
-            }
-
-            costosRegistrados.push({ desc, monto, usuario: usuarioActual, hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) });
-
-            guardarLocalmente();
-            actualizarListaCostos();
-
-            alert(`¡Costo registrado con éxito por [${usuarioActual}]! (${monto} Bs)`);
-            document.getElementById('costo-desc').value = '';
-            document.getElementById('costo-monto').value = '';
-            document.getElementById('nav-btn-resumen').click();
-        }
-
-        function actualizarListaCostos() {
-            document.getElementById('lista-costos').innerHTML = costosRegistrados.length === 0
-                ? '<p style="color: var(--text-light); font-size: 0.9rem; text-align: center; margin: 10px 0;">No hay costos registrados.</p>'
-                : costosRegistrados.map(c => `
-                    <div class="historial-item">
-                        <span><strong>📋 ${c.desc}</strong>: <strong>${c.monto} Bs</strong></span>
-                        <span style="color: var(--text-light);">${c.hora}</span>
-                    </div>
-                `).join('');
-        }
-
-        function actualizarFinanzas() {
-            let totalIngresos = 0;
-            ventasRegistradas.forEach(v => { totalIngresos += v.total; });
-
-            let totalCostos = 0;
-            costosRegistrados.forEach(c => { totalCostos += c.monto; });
-
-            let utilidad = totalIngresos - totalCostos;
-
-            document.getElementById('fin-ingresos').innerText = totalIngresos + ' Bs';
-            document.getElementById('fin-costos').innerText = totalCostos + ' Bs';
+        function actualizarGrafico() {
+            const ctx = document.getElementById('graficoProduccion').getContext('2d');
             
-            const utilidadEl = document.getElementById('fin-utilidad');
-            utilidadEl.innerText = utilidad + ' Bs';
-            utilidadEl.style.color = utilidad >= 0 ? '#047857' : '#dc2626';
+            // Agrupar huevos por fecha
+            const ultimosDias = {};
+            dbData.registros.forEach(r => {
+                const totalH = r.grandes + r.medio + r.derecha;
+                ultimosDias[r.fecha] = (ultimosDias[r.fecha] || 0) + totalH;
+            });
 
-            const maxFin = Math.max(totalIngresos, totalCostos, Math.abs(utilidad), 1);
-            const pIng = Math.round((totalIngresos / maxFin) * 100);
-            const pCos = Math.round((totalCostos / maxFin) * 100);
-            const pUti = Math.round((Math.max(utilidad, 0) / maxFin) * 100);
+            const fechas = Object.keys(ultimosDias).sort().slice(-7);
+            const totales = fechas.map(f => ultimosDias[f]);
 
-            document.getElementById('bar-ingresos').style.width = Math.max(pIng, 5) + '%';
-            document.getElementById('bar-ingresos').innerText = totalIngresos + ' Bs';
-            document.getElementById('lbl-porc-ingresos').innerText = totalIngresos > 0 ? '100%' : '0%';
+            if (chartInstance) {
+                chartInstance.destroy();
+            }
 
-            document.getElementById('bar-costos').style.width = Math.max(pCos, 5) + '%';
-            document.getElementById('bar-costos').innerText = totalCostos + ' Bs';
-            document.getElementById('lbl-porc-costos').innerText = totalIngresos > 0 ? Math.round((totalCostos / (totalIngresos || 1)) * 100) + '%' : '0%';
-
-            const barUti = document.getElementById('bar-utilidad');
-            barUti.style.width = Math.max(pUti, 5) + '%';
-            barUti.innerText = utilidad + ' Bs';
-            barUti.style.background = utilidad >= 0 ? '#10b981' : '#dc2626';
-            document.getElementById('lbl-porc-utilidad').innerText = totalIngresos > 0 ? Math.round((utilidad / (totalIngresos || 1)) * 100) + '%' : '0%';
+            chartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: fechas,
+                    datasets: [{
+                        label: 'Total Huevos',
+                        data: totales,
+                        borderColor: '#d97706',
+                        backgroundColor: 'rgba(217, 119, 6, 0.1)',
+                        fill: true,
+                        tension: 0.3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { display: false } }
+                }
+            });
         }
     </script>
 </body>
